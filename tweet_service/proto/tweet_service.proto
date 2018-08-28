@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package tweet;
+
+service Tweet {
+  rpc Tweet(TweetRequest) returns (TweetResponse) {}
+
+  rpc Newsfeed(NewsfeedRequest) returns (stream NewsfeedResponse) {}
+
+  rpc Timeline(TimelineRequest) returns (stream TimelineResponse) {}
+}
+
+message TweetRequest {
+  int32 user_id = 1;
+  string content = 2;
+}
+
+message TweetResponse {
+  int32 tweet_id = 1;
+}
+
+message NewsfeedRequest {
+  int32 user_id = 1;
+}
+
+message NewsfeedResponse {
+  string content = 1;
+  string created_at = 2;
+}
+
+message TimelineRequest {
+  int32 user_id = 1;
+  repeated int32 followees = 2;
+}
+
+message TimelineResponse {
+  int32 user_id = 1;
+  string content = 2;
+  string created_at = 3;
+}

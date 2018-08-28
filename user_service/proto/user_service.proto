@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package twitteruser;
+
+service TwitterUser {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+
+  rpc CheckPassword(CheckPasswordRequest) returns (CheckPasswordResponse) {}
+
+  rpc CheckSession(CheckSessionRequest) returns (CheckSessionResponse) {}
+
+  rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {}
+}
+
+message GetUserRequest {
+  int32 user_id = 1;
+}
+
+message GetUserResponse {
+  int32 user_id = 1;
+  string name = 2;
+}
+
+message CheckPasswordRequest {
+  int32 user_id = 1;
+  string password = 2;
+}
+
+message CheckPasswordResponse {
+  bool ok = 1;
+  string session_key = 2;
+}
+
+message CheckSessionRequest {
+  int32 user_id = 1;
+  string session_key = 2;
+}
+
+message CheckSessionResponse {
+  bool ok = 1;
+}
+
+message RemoveSessionRequest {
+  string session_key = 1;
+}
+
+message RemoveSessionResponse {
+  bool ok = 1;
+}

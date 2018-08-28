@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package friend;
+
+service Friend {
+  rpc Followees(FolloweesRequest) returns (FolloweesResponse) {}
+
+  rpc Follows(FollowsRequest) returns (FollowsResponse) {}
+}
+
+message FolloweesRequest {
+  int32 user_id = 1;
+}
+
+message FolloweesResponse {
+  repeated int32 followees = 1;
+}
+
+message FollowsRequest {
+  int32 user_id = 1;
+  int32 followee = 2;
+}
+
+message FollowsResponse {
+  bool done = 1;
+}
