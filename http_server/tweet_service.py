@@ -5,14 +5,16 @@ import tweet_service_pb2_grpc
 import grpc
 
 
-TWEET_SERVICE_HOST = os.getenv('TWEET_SERVICE_HOST', 'localhost:50052')
+TWEET_SERVICE_HOST = os.getenv('TWITTER_CASS_TWEET_SERVICE_HOST', 'localhost')
+TWEET_SERVICE_PORT = os.getenv('TWITTER_CASS_TWEET_SERVICE_PORT', '50052')
+CHANNEL_ADDR = '{}:{}'.format(TWEET_SERVICE_HOST, TWEET_SERVICE_PORT)
 
 
 class TweetService:
     def __init__(self):
-        self.channel = grpc.insecure_channel(TWEET_SERVICE_HOST)
+        self.channel = grpc.insecure_channel(CHANNEL_ADDR)
         self.stub = tweet_service_pb2_grpc.TweetStub(self.channel)
-        logging.info("[tweet-service-grpc-client] Connected to grpc server at %s", TWEET_SERVICE_HOST)
+        logging.info("[tweet-service-grpc-client] Connected to grpc server at %s", CHANNEL_ADDR)
 
     def __del__(self):
         self.channel.close()
@@ -47,5 +49,6 @@ class TweetService:
                     'created_at': str(row.created_at),
                     'content': str(row.content),
                 } for row in tweets]
+
 
 tweet_svc = TweetService()

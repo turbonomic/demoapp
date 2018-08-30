@@ -33,7 +33,6 @@ class TweetService:
         return tweet_id
 
     def timeline(self, user_id, followees):
-        # followees = friend_svc.followees(user_id)
         logging.info("User %d follows %d people" % (user_id, len(followees)))
         timeline = []
         # TODO: execute the queries asychronously
@@ -51,6 +50,7 @@ class TweetService:
     def news_feed(self, user_id):
         tweets = self._select_tweets(user_id, NEWS_FEED_COUNT)
         logging.info("%d tweets retrieved from user %d" % (len(tweets), user_id))
+        logging.info("tweets: %s", tweets)
         return tweets
 
     def _tweet_to_db(self, user_id, tweet_id, content):
@@ -62,7 +62,7 @@ class TweetService:
             'content': content,
         }
 
-        self.db_driver.execute(dbqueries.q_insert_tweet_temp, params, async=True)
+        self.db_driver.execute(dbqueries.q_insert_tweet_temp, params, is_async=True)
 
     def _select_tweets(self, user_id, count):
         params = {

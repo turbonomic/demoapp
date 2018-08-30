@@ -6,14 +6,16 @@ import grpc
 import logging
 import os
 
-USER_SERVICE_HOST = os.getenv('USER_SERVICE_HOST', 'localhost:50051')
+USER_SERVICE_HOST = os.getenv('TWITTER_CASS_USER_SERVICE_HOST', 'localhost')
+USER_SERVICE_PORT = os.getenv('TWITTER_CASS_USER_SERVICE_PORT', '50051')
+CHANNEL_ADDR = '{}:{}'.format(USER_SERVICE_HOST, USER_SERVICE_PORT)
 
 
 class UserService:
     def __init__(self):
-        self.channel = grpc.insecure_channel(USER_SERVICE_HOST)
+        self.channel = grpc.insecure_channel(CHANNEL_ADDR)
         self.stub = user_service_pb2_grpc.TwitterUserStub(self.channel)
-        logging.info("[user-service-grpc-client] Connected to grpc server at %s", USER_SERVICE_HOST)
+        logging.info("[user-service-grpc-client] Connected to grpc server at %s", CHANNEL_ADDR)
 
     def __del__(self):
         self.channel.close()

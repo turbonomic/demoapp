@@ -1,3 +1,4 @@
+import os
 import logging
 from functools import wraps
 
@@ -8,7 +9,7 @@ from friend_service import friend_svc
 from flask import Flask, jsonify, abort, make_response, render_template, flash, redirect, url_for, request
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8699
+SERVER_PORT = int(os.getenv('API_SERVER_PORT', 8699))
 
 SESSION_KEY = 'session_key'
 USER_ID = 'user_id'

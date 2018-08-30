@@ -54,8 +54,8 @@ class UserService:
         session_key = ''
 
         if ok:
-            hash_object = hashlib.sha256(str(user_id) + password)
-            session_key = hash_object.hexdigest()
+            key = str(user_id) + password
+            session_key = hashlib.sha256(key.encode('utf-8')).hexdigest()
             session_cache[session_key] = user_id
 
         return ok, session_key

@@ -71,12 +71,12 @@ class CassandraDriver:
         else:
             self.log.error("Creating table %s is not supported", self.table_name)
 
-    def execute(self, query_template, params, async=False):
+    def execute(self, query_template, params, is_async=False):
         q = query_template.substitute(params)
 
         logging.info("q=%s", q)
 
-        if async:
+        if is_async:
             return self.session.execute_async(q)
 
         return self.session.execute(q)

@@ -6,14 +6,16 @@ import grpc
 import logging
 import os
 
-FRIEND_SERVICE_HOST = os.getenv('FRIEND_SERVICE_HOST', 'localhost:50053')
+FRIEND_SERVICE_HOST = os.getenv('TWITTER_CASS_FRIEND_SERVICE_HOST', 'localhost')
+FRIEND_SERVICE_PORT = os.getenv('TWITTER_CASS_FRIEND_SERVICE_PORT', '50053')
+CHANNEL_ADDR = '{}:{}'.format(FRIEND_SERVICE_HOST, FRIEND_SERVICE_PORT)
 
 
 class FriendService:
     def __init__(self):
-        self.channel = grpc.insecure_channel(FRIEND_SERVICE_HOST)
+        self.channel = grpc.insecure_channel(CHANNEL_ADDR)
         self.stub = friend_service_pb2_grpc.FriendStub(self.channel)
-        logging.info("[friend-service-grpc-client] Connected to grpc server at %s", FRIEND_SERVICE_HOST)
+        logging.info("[friend-service-grpc-client] Connected to grpc server at %s", CHANNEL_ADDR)
 
     def __del__(self):
         self.channel.close()
