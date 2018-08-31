@@ -1,12 +1,23 @@
-{% extends "layout.html" %}
-{% block body %}
+<!DOCTYPE html>
+<html>
+<title>Turbo Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Open Sans", sans-serif}
+</style>
+<body class="w3-theme-l5">
 
 <!-- Navbar -->
 <div class="w3-top">
  <div class="w3-bar w3-theme-d2 w3-left-align w3-large">
   <a class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-theme-d2" href="javascript:void(0);" onclick="openNav()"><i class="fa fa-bars"></i></a>
-  <a href="/timeline" class="w3-bar-item w3-button w3-padding-large w3-theme-d4"><i class="fa fa-home w3-margin-right"></i>DEMO</a>
-  <a href="/newsfeed" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="News"><i class="fa fa-globe"></i></a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-theme-d4"><i class="fa fa-home w3-margin-right"></i>DEMO</a>
+  <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="News"><i class="fa fa-globe"></i></a>
   <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i class="fa fa-user"></i></a>
   <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Messages"><i class="fa fa-envelope"></i></a>
   <div class="w3-dropdown-hover w3-hide-small">
@@ -15,8 +26,8 @@
       <a href="#" class="w3-bar-item w3-button">Not supported yet</a>
     </div>
   </div>
-  <a href="/logout" class="w3-bar-item w3-button w3-hide-small w3-right w3-padding-large w3-hover-white" title="Logout">
-    <img src="https://www.w3schools.com/w3images/avatar2.png" class="w3-circle" style="height:23px;width:23px" alt="Avatar">
+  <a href="#" class="w3-bar-item w3-button w3-hide-small w3-right w3-padding-large w3-hover-white" title="Logout">
+    <img src="/w3images/avatar2.png" class="w3-circle" style="height:23px;width:23px" alt="Avatar">
   </a>
  </div>
 </div>
@@ -26,7 +37,7 @@
   <a href="#" class="w3-bar-item w3-button w3-padding-large">Link 1</a>
   <a href="#" class="w3-bar-item w3-button w3-padding-large">Link 2</a>
   <a href="#" class="w3-bar-item w3-button w3-padding-large">Link 3</a>
-  <a href="#" class="w3-bar-item w3-button w3-padding-large">{{ user_name }} Profile</a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-large">My Profile</a>
 </div>
 
 <!-- Page Container -->
@@ -41,16 +52,16 @@
          <h4 class="w3-center">My Profile</h4>
          <p class="w3-center"><img src="https://www.w3schools.com/w3images/avatar3.png" class="w3-circle" style="height:106px;width:106px" alt="Avatar"></p>
          <hr>
-         <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> {{ user_name }}</p>
+         <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> Max</p>
         </div>
       </div>
-      <div class="w3-container w3-padding">
-          <form action = "/follows" method = "POST">
-            <h6 class="w3-opacity">Friend</h6>
-            <p><input type = 'text' name = 'id_to_follow' class="w3-border w3-padding"></p>
-            <button value = 'Follow' class="w3-button w3-theme"><i class="fa fa-user-plus"></i>  Follow</button>
-          </form>
-      </div>
+            <div class="w3-container w3-padding">
+                <form action = "/follows" method = "POST">
+                  <h6 class="w3-opacity">Friend</h6>
+                  <p input type = 'text' name = 'content' contenteditable="true" class="w3-border w3-padding">123</p>
+                  <button value = 'Tweet' class="w3-button w3-theme"><i class="fa fa-user-plus"></i>  Follow</button>
+                </form>
+            </div>
       <br>
 
     <!-- End Left Column -->
@@ -65,30 +76,38 @@
             <div class="w3-container w3-padding">
                 <form action = "/tweet" method = "POST">
                     <h6 class="w3-opacity">Social Media Demo</h6>
-                    <p><input type = 'text' name = 'content' class="w3-border w3-padding"></p>
-                    <button value = 'Tweet' class="w3-button w3-theme"><i class="fa fa-pencil"></i>  Tweet</button>
+                  <p><input type = 'text' name = 'content' class="w3-border w3-padding"></p>
+                  <button value = 'Tweet' class="w3-button w3-theme"><i class="fa fa-pencil"></i>  Tweet</button>
                 </form>
+              <!--<h6 class="w3-opacity">Social Media Demo</h6>-->
+              <!--<p contenteditable="true" class="w3-border w3-padding">Status: Feeling Blue</p>-->
+              <!--<button type="button" class="w3-button w3-theme"><i class="fa fa-pencil"></i>  Post</button>-->
             </div>
           </div>
         </div>
       </div>
 
+      <div class="w3-container w3-card w3-white w3-round w3-margin"><br>
+        <img src="https://www.w3schools.com/w3images/avatar2.png" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
+        <span class="w3-right w3-opacity">1 min</span>
+        <h4>John Doe</h4><br>
+        <hr class="w3-clear">
+        <p>THE MESSAGE.</p>
+          <div class="w3-row-padding" style="margin:0 -16px">
+        </div>
+        <button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>  Like</button>
+        <button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>  Comment</button>
+      </div>
 
-        {% for tweet in tweets %}
-          <div class="w3-container w3-card w3-white w3-round w3-margin"><br>
-            <img src="https://www.w3schools.com/w3images/avatar3.png" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
-            <span class="w3-right w3-opacity">{{ tweet.created_at }}</span>
-            <h4>{{ tweet.user_name }}</h4><br>
-            <hr class="w3-clear">
-            <p>{{ tweet.content }}</p>
-              <div class="w3-row-padding" style="margin:0 -16px">
-            </div>
-            <button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>  Like</button>
-            <button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>  Comment</button>
-          </div>
-
-        <!--<div><p>[{{ tweet.created_at }}] {{ tweet.user_name }} says: <b>{{ tweet.content }}</b></p></div>-->
-        {% endfor %}
+      <div class="w3-container w3-card w3-white w3-round w3-margin"><br>
+        <img src="/w3images/avatar5.png" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
+        <span class="w3-right w3-opacity">16 min</span>
+        <h4>Jane Doe</h4><br>
+        <hr class="w3-clear">
+        <p>THE MESSAGE.</p>
+        <button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>  Like</button>
+        <button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>  Comment</button>
+      </div>
 
     <!-- End Middle Column -->
     </div>
@@ -98,7 +117,7 @@
       <div class="w3-card w3-round w3-white w3-center">
         <div class="w3-container">
           <p>Followed</p>
-          <img src="https://www.w3schools.com/w3images/avatar6.png" alt="Avatar" style="width:50%"><br>
+          <img src="/w3images/avatar6.png" alt="Avatar" style="width:50%"><br>
           <span>Jane Doe</span>
         </div>
       </div>
@@ -106,7 +125,7 @@
       <div class="w3-card w3-round w3-white w3-center">
         <div class="w3-container">
           <p>Followed By</p>
-          <img src="https://www.w3schools.com/w3images/avatar5.png" alt="Avatar" style="width:50%"><br>
+          <img src="/w3images/avatar5.png" alt="Avatar" style="width:50%"><br>
           <span>Mary James</span>
         </div>
       </div>
@@ -156,4 +175,5 @@ function openNav() {
 }
 </script>
 
-{% endblock %}
+</body>
+</html>
