@@ -13,8 +13,14 @@ class UserServicer(user_service_pb2_grpc.TwitterUserServicer):
 
     def GetUser(self, request, context):
         user_id = request.user_id
-        name = user_svc.name(user_id)
+        name = user_svc.get_name(user_id)
         return user_service_pb2.GetUserResponse(user_id=user_id, name=name)
+
+    def GetUsers(self, request, context):
+        names = user_svc.get_names(list(request.user_ids))
+        res = user_service_pb2.GetUsersResponse()
+        res.names[:] = names
+        return res
 
     def CheckPassword(self, request, context):
         user_id = request.user_id
@@ -33,6 +39,7 @@ class UserServicer(user_service_pb2_grpc.TwitterUserServicer):
         ok = user_svc.remove_session(session_key)
         return user_service_pb2.RemoveSessionResponse(ok=ok)
 
+
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     user_service_pb2_grpc.add_TwitterUserServicer_to_server(
@@ -49,8 +56,10 @@ def serve():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s : %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
+    logger = logging.getLogger()
+    logger.setLevel('INFO')
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
+    logger.addHandler(handler)
 
     serve()

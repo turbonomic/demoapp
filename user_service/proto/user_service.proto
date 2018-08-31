@@ -5,6 +5,8 @@ package twitteruser;
 service TwitterUser {
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
 
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {}
+
   rpc CheckPassword(CheckPasswordRequest) returns (CheckPasswordResponse) {}
 
   rpc CheckSession(CheckSessionRequest) returns (CheckSessionResponse) {}
@@ -19,6 +21,14 @@ message GetUserRequest {
 message GetUserResponse {
   int32 user_id = 1;
   string name = 2;
+}
+
+message GetUsersRequest {
+  repeated int32 user_ids = 1;
+}
+
+message GetUsersResponse {
+  repeated string names = 1;
 }
 
 message CheckPasswordRequest {

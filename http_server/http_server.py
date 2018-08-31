@@ -107,8 +107,11 @@ def timeline():
     followees = friend_svc.followees(user_id)
     logging.info('User %d is followed by %d users', user_id, len(followees))
     tweets = tweet_svc.timeline(user_id, followees)
-    for t in tweets:
-        t['user_name'] = user_svc.name(int(t['user_id']))
+
+    user_ids = [int(t['user_id']) for t in tweets]
+    user_names = user_svc.names(user_ids)
+    for idx, t in enumerate(tweets):
+        t['user_name'] = user_names[idx]
 
     return render_template('twitter.html', title='MaxTurboTwitter', user_name=user_svc.name(user_id), tweets=tweets)
 
@@ -120,8 +123,10 @@ def newsfeed():
     user_id = int(user_id)
     logging.info('User %d requests news feed', user_id)
     tweets = tweet_svc.news_feed(user_id)
+
+    user_name = user_svc.name(user_id)
     for t in tweets:
-        t['user_name'] = user_svc.name(user_id)
+        t['user_name'] = user_name
 
     return render_template('twitter.html', title='MaxTurboTwitter', user_name=user_svc.name(user_id), tweets=tweets)
 
@@ -162,7 +167,7 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel('INFO')
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
     logger.addHandler(handler)
 
     logging.info("Strating HTTP server...")

@@ -16,11 +16,11 @@ def mock_password(user_id):
 
 class UserService:
     def __init__(self):
-        self.names = {}
+        self._names = {}
         dirpath = os.path.dirname(os.path.realpath(__file__))
         filename = dirpath + "/" + NAME_LIST_FILENAME
         self._load_name_dict(filename)
-        self.name_count = len(self.names)
+        self.name_count = len(self._names)
         logging.info("Loaded %d names from %s", self.name_count, filename)
 
     def _load_name_dict(self, filename):
@@ -30,14 +30,17 @@ class UserService:
             for line in name_file:
                 i += 1
                 name = line.strip().split(" ")[0]
-                self.names[i] = name
+                self._names[i] = name
 
-    def name(self, user_id):
-        username = self.names.get((user_id % self.name_count) + 1, "NONAME")
+    def get_name(self, user_id):
+        username = self._names.get((user_id % self.name_count) + 1, "NONAME")
         idx = user_id // self.name_count
         if idx > 0:
             username += "-" + str(idx)
         return username
+
+    def get_names(self, user_ids):
+        return list(map(self.get_name, user_ids))
 
     def check_session(self, user_id, key):
         return session_cache.get(key) == user_id

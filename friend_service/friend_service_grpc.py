@@ -40,8 +40,10 @@ def serve():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s : %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
+    logger = logging.getLogger()
+    logger.setLevel('INFO')
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
+    logger.addHandler(handler)
 
     serve()

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='user_service.proto',
   package='twitteruser',
   syntax='proto3',
-  serialized_pb=_b('\n\x12user_service.proto\x12\x0btwitteruser\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\"0\n\x0fGetUserResponse\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"9\n\x14\x43heckPasswordRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x10\n\x08password\x18\x02 \x01(\t\"8\n\x15\x43heckPasswordResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x13\n\x0bsession_key\x18\x02 \x01(\t\";\n\x13\x43heckSessionRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x13\n\x0bsession_key\x18\x02 \x01(\t\"\"\n\x14\x43heckSessionResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\"+\n\x14RemoveSessionRequest\x12\x13\n\x0bsession_key\x18\x01 \x01(\t\"#\n\x15RemoveSessionResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x32\xe0\x02\n\x0bTwitterUser\x12\x46\n\x07GetUser\x12\x1b.twitteruser.GetUserRequest\x1a\x1c.twitteruser.GetUserResponse\"\x00\x12X\n\rCheckPassword\x12!.twitteruser.CheckPasswordRequest\x1a\".twitteruser.CheckPasswordResponse\"\x00\x12U\n\x0c\x43heckSession\x12 .twitteruser.CheckSessionRequest\x1a!.twitteruser.CheckSessionResponse\"\x00\x12X\n\rRemoveSession\x12!.twitteruser.RemoveSessionRequest\x1a\".twitteruser.RemoveSessionResponse\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x12user_service.proto\x12\x0btwitteruser\"!\n\x0eGetUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\"0\n\x0fGetUserResponse\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"#\n\x0fGetUsersRequest\x12\x10\n\x08user_ids\x18\x01 \x03(\x05\"!\n\x10GetUsersResponse\x12\r\n\x05names\x18\x01 \x03(\t\"9\n\x14\x43heckPasswordRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x10\n\x08password\x18\x02 \x01(\t\"8\n\x15\x43heckPasswordResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x13\n\x0bsession_key\x18\x02 \x01(\t\";\n\x13\x43heckSessionRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x13\n\x0bsession_key\x18\x02 \x01(\t\"\"\n\x14\x43heckSessionResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\"+\n\x14RemoveSessionRequest\x12\x13\n\x0bsession_key\x18\x01 \x01(\t\"#\n\x15RemoveSessionResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x32\xab\x03\n\x0bTwitterUser\x12\x46\n\x07GetUser\x12\x1b.twitteruser.GetUserRequest\x1a\x1c.twitteruser.GetUserResponse\"\x00\x12I\n\x08GetUsers\x12\x1c.twitteruser.GetUsersRequest\x1a\x1d.twitteruser.GetUsersResponse\"\x00\x12X\n\rCheckPassword\x12!.twitteruser.CheckPasswordRequest\x1a\".twitteruser.CheckPasswordResponse\"\x00\x12U\n\x0c\x43heckSession\x12 .twitteruser.CheckSessionRequest\x1a!.twitteruser.CheckSessionResponse\"\x00\x12X\n\rRemoveSession\x12!.twitteruser.RemoveSessionRequest\x1a\".twitteruser.RemoveSessionResponse\"\x00\x62\x06proto3')
 )
 
 
@@ -94,6 +94,68 @@ _GETUSERRESPONSE = _descriptor.Descriptor(
 )
 
 
+_GETUSERSREQUEST = _descriptor.Descriptor(
+  name='GetUsersRequest',
+  full_name='twitteruser.GetUsersRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_ids', full_name='twitteruser.GetUsersRequest.user_ids', index=0,
+      number=1, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=120,
+  serialized_end=155,
+)
+
+
+_GETUSERSRESPONSE = _descriptor.Descriptor(
+  name='GetUsersResponse',
+  full_name='twitteruser.GetUsersResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='names', full_name='twitteruser.GetUsersResponse.names', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=157,
+  serialized_end=190,
+)
+
+
 _CHECKPASSWORDREQUEST = _descriptor.Descriptor(
   name='CheckPasswordRequest',
   full_name='twitteruser.CheckPasswordRequest',
@@ -127,8 +189,8 @@ _CHECKPASSWORDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=120,
-  serialized_end=177,
+  serialized_start=192,
+  serialized_end=249,
 )
 
 
@@ -165,8 +227,8 @@ _CHECKPASSWORDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=179,
-  serialized_end=235,
+  serialized_start=251,
+  serialized_end=307,
 )
 
 
@@ -203,8 +265,8 @@ _CHECKSESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=237,
-  serialized_end=296,
+  serialized_start=309,
+  serialized_end=368,
 )
 
 
@@ -234,8 +296,8 @@ _CHECKSESSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=298,
-  serialized_end=332,
+  serialized_start=370,
+  serialized_end=404,
 )
 
 
@@ -265,8 +327,8 @@ _REMOVESESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=334,
-  serialized_end=377,
+  serialized_start=406,
+  serialized_end=449,
 )
 
 
@@ -296,12 +358,14 @@ _REMOVESESSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=379,
-  serialized_end=414,
+  serialized_start=451,
+  serialized_end=486,
 )
 
 DESCRIPTOR.message_types_by_name['GetUserRequest'] = _GETUSERREQUEST
 DESCRIPTOR.message_types_by_name['GetUserResponse'] = _GETUSERRESPONSE
+DESCRIPTOR.message_types_by_name['GetUsersRequest'] = _GETUSERSREQUEST
+DESCRIPTOR.message_types_by_name['GetUsersResponse'] = _GETUSERSRESPONSE
 DESCRIPTOR.message_types_by_name['CheckPasswordRequest'] = _CHECKPASSWORDREQUEST
 DESCRIPTOR.message_types_by_name['CheckPasswordResponse'] = _CHECKPASSWORDRESPONSE
 DESCRIPTOR.message_types_by_name['CheckSessionRequest'] = _CHECKSESSIONREQUEST
@@ -323,6 +387,20 @@ GetUserResponse = _reflection.GeneratedProtocolMessageType('GetUserResponse', (_
   # @@protoc_insertion_point(class_scope:twitteruser.GetUserResponse)
   ))
 _sym_db.RegisterMessage(GetUserResponse)
+
+GetUsersRequest = _reflection.GeneratedProtocolMessageType('GetUsersRequest', (_message.Message,), dict(
+  DESCRIPTOR = _GETUSERSREQUEST,
+  __module__ = 'user_service_pb2'
+  # @@protoc_insertion_point(class_scope:twitteruser.GetUsersRequest)
+  ))
+_sym_db.RegisterMessage(GetUsersRequest)
+
+GetUsersResponse = _reflection.GeneratedProtocolMessageType('GetUsersResponse', (_message.Message,), dict(
+  DESCRIPTOR = _GETUSERSRESPONSE,
+  __module__ = 'user_service_pb2'
+  # @@protoc_insertion_point(class_scope:twitteruser.GetUsersResponse)
+  ))
+_sym_db.RegisterMessage(GetUsersResponse)
 
 CheckPasswordRequest = _reflection.GeneratedProtocolMessageType('CheckPasswordRequest', (_message.Message,), dict(
   DESCRIPTOR = _CHECKPASSWORDREQUEST,
@@ -374,8 +452,8 @@ _TWITTERUSER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=417,
-  serialized_end=769,
+  serialized_start=489,
+  serialized_end=916,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetUser',
@@ -387,9 +465,18 @@ _TWITTERUSER = _descriptor.ServiceDescriptor(
     options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='GetUsers',
+    full_name='twitteruser.TwitterUser.GetUsers',
+    index=1,
+    containing_service=None,
+    input_type=_GETUSERSREQUEST,
+    output_type=_GETUSERSRESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
     name='CheckPassword',
     full_name='twitteruser.TwitterUser.CheckPassword',
-    index=1,
+    index=2,
     containing_service=None,
     input_type=_CHECKPASSWORDREQUEST,
     output_type=_CHECKPASSWORDRESPONSE,
@@ -398,7 +485,7 @@ _TWITTERUSER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='CheckSession',
     full_name='twitteruser.TwitterUser.CheckSession',
-    index=2,
+    index=3,
     containing_service=None,
     input_type=_CHECKSESSIONREQUEST,
     output_type=_CHECKSESSIONRESPONSE,
@@ -407,7 +494,7 @@ _TWITTERUSER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='RemoveSession',
     full_name='twitteruser.TwitterUser.RemoveSession',
-    index=3,
+    index=4,
     containing_service=None,
     input_type=_REMOVESESSIONREQUEST,
     output_type=_REMOVESESSIONRESPONSE,

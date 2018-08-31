@@ -5,8 +5,8 @@ import user_service_pb2 as user__service__pb2
 
 
 class TwitterUserStub(object):
-  """User interface exported by the server.
-  """
+  # missing associated documentation comment in .proto file
+  pass
 
   def __init__(self, channel):
     """Constructor.
@@ -18,6 +18,11 @@ class TwitterUserStub(object):
         '/twitteruser.TwitterUser/GetUser',
         request_serializer=user__service__pb2.GetUserRequest.SerializeToString,
         response_deserializer=user__service__pb2.GetUserResponse.FromString,
+        )
+    self.GetUsers = channel.unary_unary(
+        '/twitteruser.TwitterUser/GetUsers',
+        request_serializer=user__service__pb2.GetUsersRequest.SerializeToString,
+        response_deserializer=user__service__pb2.GetUsersResponse.FromString,
         )
     self.CheckPassword = channel.unary_unary(
         '/twitteruser.TwitterUser/CheckPassword',
@@ -37,10 +42,17 @@ class TwitterUserStub(object):
 
 
 class TwitterUserServicer(object):
-  """User interface exported by the server.
-  """
+  # missing associated documentation comment in .proto file
+  pass
 
   def GetUser(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetUsers(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -75,6 +87,11 @@ def add_TwitterUserServicer_to_server(servicer, server):
           servicer.GetUser,
           request_deserializer=user__service__pb2.GetUserRequest.FromString,
           response_serializer=user__service__pb2.GetUserResponse.SerializeToString,
+      ),
+      'GetUsers': grpc.unary_unary_rpc_method_handler(
+          servicer.GetUsers,
+          request_deserializer=user__service__pb2.GetUsersRequest.FromString,
+          response_serializer=user__service__pb2.GetUsersResponse.SerializeToString,
       ),
       'CheckPassword': grpc.unary_unary_rpc_method_handler(
           servicer.CheckPassword,

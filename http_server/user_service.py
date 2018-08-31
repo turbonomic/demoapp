@@ -24,6 +24,12 @@ class UserService:
         user = self.stub.GetUser(user_service_pb2.GetUserRequest(user_id=user_id))
         return user.name
 
+    def names(self, user_ids):
+        request = user_service_pb2.GetUsersRequest()
+        request.user_ids[:] = user_ids
+        users = self.stub.GetUsers(request)
+        return users.names
+
     def check_session(self, user_id, session_key):
         res = self.stub.CheckSession(user_service_pb2.CheckSessionRequest(user_id=user_id, session_key=session_key))
         return res.ok

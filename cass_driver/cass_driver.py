@@ -85,7 +85,7 @@ class CassandraDriver:
 logger = logging.getLogger()
 logger.setLevel('INFO')
 handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
 logger.addHandler(handler)
 
 
