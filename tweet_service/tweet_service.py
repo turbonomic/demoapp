@@ -35,11 +35,7 @@ class TweetService:
     def timeline(self, user_id, followees):
         logging.info("User %d follows %d people" % (user_id, len(followees)))
         timeline = []
-        # TODO: execute the queries asychronously
-        for followee in followees:
-            tweets = self._select_tweets(followee, TIMELINE_COUNT)
-            timeline += tweets
-            logging.info("%d tweets retrieved from follower %d" % (len(tweets), followee))
+        timeline = self._select_tweets_async(followees, TIMELINE_COUNT)
 
         logging.info("%d tweets retrieved for timeline of user %d" % (len(timeline), user_id))
 
@@ -72,6 +68,34 @@ class TweetService:
         }
 
         rows = self.db_driver.execute(dbqueries.q_select_tweet_latest_tweets_temp, params)
+
+        return [{
+                    'created_at': str(row.created_at),
+                    'user_id': str(row.user_id),
+                    'content': str(row.content),
+                } for row in rows]
+
+    def _select_tweets_async(self, user_ids, count_per_user):
+        future_dict = {}
+        for user_id in user_ids:
+            params = {
+                'table_name': TWEET_TABLE,
+                'user_id': user_id,
+                'count': count_per_user,
+            }
+
+            future = self.db_driver.execute(dbqueries.q_select_tweet_latest_tweets_temp, params, is_async=True)
+            future_dict[user_id] = future
+            logging.info("Select tweets asyncly from user %s", str(user_id))
+
+        rows = []
+        for user_id in user_ids:
+            try:
+                res = future_dict[user_id].result()
+                rows += res
+                logging.info("Received tweets asyncly from user %s", str(user_id))
+            except Exception:
+                logging.exception("Select tweets from user %s failed", str(user_id))
 
         return [{
                     'created_at': str(row.created_at),
