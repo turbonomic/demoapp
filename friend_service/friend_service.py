@@ -37,18 +37,18 @@ class FriendService:
     def followees(self, user_id):
         rows = self.db_driver.execute(dbqueries.q_select_follows_temp, params(user_id))
         followees = [row.followee_id for row in rows]
-        logging.info("User %d follows %d users", user_id, len(followees))
+        logging.debug("User %d follows %d users", user_id, len(followees))
         return followees
 
     def followers(self, user_id):
         rows = self.db_driver.execute(dbqueries.q_select_followers_temp, params(user_id))
         followers = [row.user_id for row in rows]
-        logging.info("User %d has %d followers", user_id, len(followers))
+        logging.debug("User %d has %d followers", user_id, len(followers))
         return followers
 
     def follows(self, from_id, to_id):
         num_follows = self.count_follows(from_id)
-        logging.info("User %d has %d follows", from_id, num_follows)
+        logging.debug("User %d has %d follows", from_id, num_follows)
         if num_follows >= MAX_NUM_FOLLOWEES:
             logging.warning("User %d already reached max (%d) follows", from_id, MAX_NUM_FOLLOWEES)
             # TODO: raise error
@@ -67,7 +67,7 @@ class FriendService:
     def count_follows(self, user_id):
         rows = self.db_driver.execute(dbqueries.q_count_follows_temp, params(user_id))
         count = [row.system_count_followee_id for row in rows][0]
-        logging.info("User %d has followed %d people", user_id, count)
+        logging.debug("User %d has followed %d people", user_id, count)
         return count
 
 

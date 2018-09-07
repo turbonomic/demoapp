@@ -80,39 +80,16 @@
             <span class="w3-right w3-opacity">{{ tweet.created_at }}</span>
             <h4>{{ tweet.user_name }}</h4><br>
             <hr class="w3-clear">
-            <p>{{ tweet.content }}</p>
+            <p>{{ tweet.content.decode('utf-8') }}</p>
               <div class="w3-row-padding" style="margin:0 -16px">
             </div>
-            <button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>  Like</button>
-            <button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>  Comment</button>
+            <!--<button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>  Like</button>-->
+            <!--<button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>  Comment</button>-->
           </div>
 
-        <!--<div><p>[{{ tweet.created_at }}] {{ tweet.user_name }} says: <b>{{ tweet.content }}</b></p></div>-->
         {% endfor %}
 
     <!-- End Middle Column -->
-    </div>
-
-    <!-- Right Column -->
-    <div class="w3-col m2">
-      <div class="w3-card w3-round w3-white w3-center">
-        <div class="w3-container">
-          <p>Followed</p>
-          <img src="https://www.w3schools.com/w3images/avatar6.png" alt="Avatar" style="width:50%"><br>
-          <span>Jane Doe</span>
-        </div>
-      </div>
-      <br>
-      <div class="w3-card w3-round w3-white w3-center">
-        <div class="w3-container">
-          <p>Followed By</p>
-          <img src="https://www.w3schools.com/w3images/avatar5.png" alt="Avatar" style="width:50%"><br>
-          <span>Mary James</span>
-        </div>
-      </div>
-      <br>
-
-    <!-- End Right Column -->
     </div>
 
   <!-- End Grid -->

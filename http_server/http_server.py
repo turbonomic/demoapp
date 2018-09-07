@@ -22,19 +22,19 @@ def check_session(cookies):
     if SESSION_KEY in cookies and USER_ID in cookies:
         user_id = cookies.get(USER_ID)
         session_key = cookies.get(SESSION_KEY)
-        logging.info("=userid, session: %s, %s", user_id, session_key)
+        logging.debug("=userid, session: %s, %s", user_id, session_key)
         if user_svc.check_session(int(user_id), session_key):
             return True
 
-    logging.info("check session false: %s", cookies)
+    logging.debug("check session false: %s", cookies)
     return False
 
 
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        logging.info("cookie: %s", request.cookies)
-        logging.info("logged_in: %s", request.cookies.get('logged_in'))
+        logging.debug("cookie: %s", request.cookies)
+        logging.debug("logged_in: %s", request.cookies.get('logged_in'))
         if check_session(request.cookies):
             return f(*args, **kwargs)
         else:
@@ -47,7 +47,7 @@ def login_required(f):
 @login_required
 def index():
     user_id = request.cookies.get(USER_ID)
-    logging.info("user %s has cookie: %s", user_id, request.cookies)
+    logging.debug("user %s has cookie: %s", user_id, request.cookies)
     return redirect(url_for('newsfeed'))
 
 
@@ -61,13 +61,13 @@ def setcookie():
 
     ok, session_key = user_svc.check_password(int(user), pw)
 
-    logging.info("check password: %s, %s", str(ok), session_key)
+    logging.debug("check password: %s, %s", str(ok), session_key)
 
     if ok:
         resp.set_cookie(SESSION_KEY, session_key)
         resp.set_cookie(USER_ID, user)
 
-        logging.info("cookie: %s", request.cookies)
+        logging.debug("cookie: %s", request.cookies)
         flash('You were successfully logged in')
     else:
         flash('Logged in failed! Invalid user ID or password.')
@@ -91,7 +91,7 @@ def logout():
 
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie(SESSION_KEY, '', expires=0)
-    logging.info("cookie: %s", request.cookies)
+    logging.debug("cookie: %s", request.cookies)
 
     flash('You were successfully logged out')
 
@@ -105,7 +105,7 @@ def timeline():
     user_id = int(user_id)
     logging.info('User %d requests timeline', user_id)
     followees = friend_svc.followees(user_id)
-    logging.info('User %d is followed by %d users', user_id, len(followees))
+    logging.debug('User %d is followed by %d users', user_id, len(followees))
     tweets = tweet_svc.timeline(user_id, followees)
 
     user_ids = [int(t['user_id']) for t in tweets]
@@ -139,7 +139,7 @@ def tweet():
     content = request.form['content']
     logging.info('User %d said %s', user_id, str(content))
     tweet_id = tweet_svc.tweet(user_id, content)
-    logging.info('User %d said with tweet id %d', user_id, tweet_id)
+    logging.debug('User %d said with tweet id %d', user_id, tweet_id)
     return redirect(url_for('newsfeed'))
 
 

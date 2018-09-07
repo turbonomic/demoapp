@@ -20,7 +20,7 @@ class TweetService:
         self.channel.close()
 
     def tweet(self, user_id, content):
-        logging.info("%d tweets %s" % (user_id, content))
+        logging.debug("%d tweets %s" % (user_id, content))
         res = self.stub.Tweet(tweet_service_pb2.TweetRequest(user_id=user_id, content=content))
         return res.tweet_id
 
@@ -31,12 +31,12 @@ class TweetService:
         # TODO: implement streaming
         timeline = list(self.stub.Timeline(tr))
 
-        logging.info("%d tweets retrieved for timeline of user %d" % (len(timeline), user_id))
+        logging.debug("%d tweets retrieved for timeline of user %d" % (len(timeline), user_id))
 
         return [{
-                    'created_at': str(row.created_at),
+                    'created_at': row.created_at.encode('utf-8'),
                     'user_id': str(row.user_id),
-                    'content': str(row.content),
+                    'content': row.content.encode('utf-8'),
                 } for row in timeline]
 
     def news_feed(self, user_id):
@@ -44,10 +44,10 @@ class TweetService:
         nfrequest = tweet_service_pb2.NewsfeedRequest(user_id=user_id)
         tweets = self.stub.Newsfeed(nfrequest)
         tweets = list(tweets)
-        logging.info("%d tweets retrieved from user %d" % (len(tweets), user_id))
+        logging.debug("%d tweets retrieved from user %d" % (len(tweets), user_id))
         return [{
-                    'created_at': str(row.created_at),
-                    'content': str(row.content),
+                    'created_at': row.created_at.encode('utf-8'),
+                    'content': row.content.encode('utf-8'),
                 } for row in tweets]
 
 

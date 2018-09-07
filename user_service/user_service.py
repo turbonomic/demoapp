@@ -11,7 +11,7 @@ session_cache = {}
 
 
 def mock_password(user_id):
-    return 'pw' + str(user_id)
+    return str(user_id)
 
 
 class UserService:
@@ -62,5 +62,6 @@ class UserService:
             session_cache[session_key] = user_id
 
         return ok, session_key
+
 
 user_svc = UserService()

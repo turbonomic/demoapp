@@ -12,7 +12,6 @@ CASSANDRA_PORT = os.getenv('CASSANDRA_PORT', 9042)
 DC = 'DC1'
 
 
-
 table_create_query_dict = {
     conf.TWITTER_TWEET_TABLE_NAME: cstr.q_create_tweet_table_temp.substitute(
         table_name=conf.TWITTER_TWEET_TABLE_NAME),
@@ -22,15 +21,14 @@ table_create_query_dict = {
 
 
 class CassandraDriver:
-    def __init__(self, keyspace, table_name=None, hosts=('localhost',), log=None):
+    def __init__(self, keyspace, table_name=None, hosts=('localhost',)):
         self.cluster = None
         self.session = None
         self.hosts = list(hosts)
         self.keyspace = keyspace
         self.table_name = table_name
-        self.log = log
 
-        self.log.info("Creating driver to Cassandra cluster %s with keyspace %s and table %s",
+        logging.info("Creating driver to Cassandra cluster %s with keyspace %s and table %s",
                       self.hosts, self.keyspace, self.table_name)
 
         self._create_session()
@@ -55,38 +53,31 @@ class CassandraDriver:
 
         rows = session.execute(cstr.Q_SELECT_KEYSPACES)
         keyspace_list = [row[0] for row in rows]
-        self.log.info("Keyspaces: %s", keyspace_list)
+        logging.info("Keyspaces: %s", keyspace_list)
         if keyspace in keyspace_list:
-            self.log.info("Keyspace %s exists...", keyspace)
+            logging.info("Keyspace %s exists...", keyspace)
             return
         else:
             spec = cstr.q_create_keyspace_temp.substitute(keyspace=keyspace)
-            self.log.info("Creating keyspace of spec %s...", spec)
+            logging.info("Creating keyspace of spec %s...", spec)
             session.execute(spec)
 
     def _create_table(self):
-        self.log.info("Creating table %s (if not exist)", self.table_name)
+        logging.info("Creating table %s (if not exist)", self.table_name)
         if self.table_name in table_create_query_dict:
             self.session.execute(table_create_query_dict[self.table_name])
         else:
-            self.log.error("Creating table %s is not supported", self.table_name)
+            logging.error("Creating table %s is not supported", self.table_name)
 
     def execute(self, query_template, params, is_async=False):
         q = query_template.substitute(params)
 
-        logging.info("q=%s", q)
+        logging.debug("q=%s", q)
 
         if is_async:
             return self.session.execute_async(q)
 
         return self.session.execute(q)
-
-
-logger = logging.getLogger()
-logger.setLevel('INFO')
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
-logger.addHandler(handler)
 
 
 # Driver cache
@@ -99,21 +90,11 @@ def get_db_driver(keyspace, table_name):
     key = (keyspace, table_name)
     if key in cass_drivers:
         cass_driver = cass_drivers[key]
-        logger.debug("cass driver exists!")
+        logging.debug("cass driver exists!")
     else:
         time.sleep(5)  # TODO: Remove!
-        cass_driver = CassandraDriver(keyspace, table_name=table_name, hosts=CASSANDRA_HOSTS, log=logger)
+        cass_driver = CassandraDriver(keyspace, table_name=table_name, hosts=CASSANDRA_HOSTS)
         cass_drivers[key] = cass_driver
-        logger.info("Created new cass driver with keyspace %s and table %s!", keyspace, table_name)
+        logging.info("Created new cass driver with keyspace %s and table %s!", keyspace, table_name)
     cass_lock.release()
     return cass_driver
-
-
-# if __name__ == '__main__':
-#     # CassandraDriver(KEYSPACE).drop_keyspace(KEYSPACE)
-#     print("\n======== Started connecting to Cassandra cluster with keyspace %s ========\n" % conf.TWITTER_KEYSPACE)
-#     driver = get_db_driver(conf.TWITTER_KEYSPACE, conf.TWITTER_TWEET_TABLE_NAME)
-#
-#     # print("\n======== Started %d write operations from keyspace %s ========\n" % (NUM_WRITE_REQUESTS, KEYSPACE))
-#     #
-#     # print("\n======== Started %d read operations from keyspace %s ========\n" % (NUM_READ_REQUESTS, KEYSPACE))

@@ -2,6 +2,7 @@ import logging
 import datetime
 import threading
 import operator
+import time
 
 import sys
 from os import path
@@ -14,6 +15,17 @@ TWITTER_KEYSPACE = conf.TWITTER_KEYSPACE
 TWEET_TABLE = conf.TWITTER_TWEET_TABLE_NAME
 NEWS_FEED_COUNT = conf.TWITTER_NEWS_FEED_COUNT
 TIMELINE_COUNT = conf.TWITTER_TIMELINE_COUNT
+TOTAL_TIMELINE_COUNT = conf.TWITTER_TOTAL_TIMELINE_COUNT
+
+
+def profile(func):
+    def wrap(*args, **kwargs):
+        start_time = time.time()
+        ret = func(*args, **kwargs)
+        elapsed_time = time.time() - start_time
+        logging.info('[%s] elapsed_time: %f (seconds)' % (func.__name__, elapsed_time))
+        return ret
+    return wrap
 
 
 class TweetService:
@@ -33,20 +45,19 @@ class TweetService:
         return tweet_id
 
     def timeline(self, user_id, followees):
-        logging.info("User %d follows %d people" % (user_id, len(followees)))
-        timeline = []
+        logging.debug("User %d follows %d people" % (user_id, len(followees)))
         timeline = self._select_tweets_async(followees, TIMELINE_COUNT)
 
         logging.info("%d tweets retrieved for timeline of user %d" % (len(timeline), user_id))
 
         # Sort to have the latest ones first
         timeline.sort(key=operator.itemgetter('created_at'), reverse=True)
-        return timeline
+        return timeline[:TOTAL_TIMELINE_COUNT]
 
     def news_feed(self, user_id):
         tweets = self._select_tweets(user_id, NEWS_FEED_COUNT)
         logging.info("%d tweets retrieved from user %d" % (len(tweets), user_id))
-        logging.info("tweets: %s", tweets)
+        logging.debug("tweets: %s", tweets)
         return tweets
 
     def _tweet_to_db(self, user_id, tweet_id, content):
@@ -60,6 +71,7 @@ class TweetService:
 
         self.db_driver.execute(dbqueries.q_insert_tweet_temp, params, is_async=True)
 
+    @profile
     def _select_tweets(self, user_id, count):
         params = {
             'table_name': TWEET_TABLE,
@@ -72,9 +84,10 @@ class TweetService:
         return [{
                     'created_at': str(row.created_at),
                     'user_id': str(row.user_id),
-                    'content': str(row.content),
+                    'content': row.content.encode('utf-8'), # content type is unicode
                 } for row in rows]
 
+    @profile
     def _select_tweets_async(self, user_ids, count_per_user):
         future_dict = {}
         for user_id in user_ids:
@@ -86,7 +99,7 @@ class TweetService:
 
             future = self.db_driver.execute(dbqueries.q_select_tweet_latest_tweets_temp, params, is_async=True)
             future_dict[user_id] = future
-            logging.info("Select tweets asyncly from user %s", str(user_id))
+            logging.debug("Select tweets asyncly from user %s", str(user_id))
 
         rows = []
         for user_id in user_ids:
@@ -100,7 +113,7 @@ class TweetService:
         return [{
                     'created_at': str(row.created_at),
                     'user_id': str(row.user_id),
-                    'content': str(row.content),
+                    'content': row.content.encode('utf-8'),
                 } for row in rows]
 
 
