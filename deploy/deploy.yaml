@@ -53,7 +53,7 @@ metadata:
   labels:
     app: twitter-cass-api
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 8699
       targetPort: 8699
@@ -105,6 +105,13 @@ spec:
           env:
           - name: CASSANDRA_HOST_ADDRESS
             value: "cassandra-0.cassandra.default.svc.cluster.local"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
       restartPolicy: Always
 ---
 apiVersion: extensions/v1beta1
@@ -150,4 +157,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8699
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
       restartPolicy: Always
