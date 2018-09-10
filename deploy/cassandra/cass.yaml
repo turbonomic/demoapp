@@ -1,0 +1,590 @@
+---
+# Source: cassandra/templates/configmap.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cassandra
+  namespace: default
+  labels:
+    app: cassandra
+    chart: cassandra-0.9.2
+    release: RELEASE-NAME
+    heritage: Tiller
+data:
+  envVars.sh: |-
+    #!/bin/bash
+
+    export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
+    export CASSANDRA_SEEDS=cassandra-0.cassandra.default.svc.$CLUSTER_DOMAIN,cassandra-1.cassandra.default.svc.$CLUSTER_DOMAIN
+  jvm_options.sh: |-
+    #!/bin/bash
+
+    # Todo: avoid this and add manage it with run.sh
+    echo "JVM_OPTS=\"\$JVM_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2\"" >> /etc/cassandra/cassandra-env.sh
+  run_override.sh: |-
+    #!/bin/bash
+
+    source /usr/local/apache-cassandra/scripts/envVars.sh
+    /usr/local/apache-cassandra/scripts/jvm_options.sh
+
+    /run.sh
+  postStart.sh: |-
+    #!/bin/bash
+    source /usr/local/apache-cassandra/scripts/envVars.sh
+
+    until /ready-probe.sh ; do
+      echo "Waiting node to be ready"
+      sleep 1
+    done
+    exit 0
+  preStop.sh: |-
+    #!/bin/sh
+
+    run_nodetool() {
+      echo "Running: nodetool $1"
+      /usr/local/apache-cassandra/bin/nodetool $1
+      sleep 5
+    }
+
+    while [ $(/usr/local/apache-cassandra/bin/nodetool status | awk "/$CASSANDRA_RACK/{ print \$1,\$2 }" | grep -v $POD_IP | awk '{ print $1 }' | grep -v UN) -eq 0 ] ; do
+      echo "Waiting all nodes to recover a correct status before draining this node"
+      sleep 5
+      pidof java || exit 1
+    done
+
+    run_nodetool disablethrift
+    run_nodetool disablebinary
+    run_nodetool disablegossip
+    run_nodetool flush
+    run_nodetool drain
+    sleep 10
+    run_nodetool stop
+    run_nodetool stopdaemon
+
+    exit 0
+  snapshot2s3.sh: |-
+    #!/bin/bash
+
+    function alert_failure() {
+      content=$1
+      file="${CASSANDRA_CLUSTER_NAME}_$(hostname)"
+      resource="/$AWS_BUCKET/failures/${file}"
+      contentType="text/plain"
+      dateValue=`date -R`
+      stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
+      signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${AWS_SECRET_ACCESS_KEY} -binary | base64`
+
+      echo -e ${content} >> $file
+      curl -X PUT -T "${file}" \
+        -H "Host: ${AWS_BUCKET}.s3.amazonaws.com" \
+        -H "Date: ${dateValue}" \
+        -H "Content-Type: ${contentType}" \
+        -H "Authorization: AWS ${AWS_ACCESS_KEY_ID}:${signature}" \
+        https://${AWS_BUCKET}.s3-eu-west-1.amazonaws.com/failures/${file}
+      rm -f $file
+    }
+
+    function clean() {
+      echo "[+] Cleaning"
+      /usr/local/apache-cassandra/bin/nodetool clearsnapshot
+      rm -Rf /snap /tmp/snapshot2s3.log
+    }
+
+    # Create lock or stop if already present
+    function create_lock() {
+      if [ -f /tmp/snapshot2s3.lock ] ; then
+        echo "Backup or restore is already in progress for $CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+        exit 0
+      fi
+    }
+
+    function release_lock() {
+      rm -Rf /tmp/snapshot2s3.lock
+    }
+
+    function backup() {
+
+      create_lock
+      clean
+
+      export LC_ALL=C
+      snap_name="snapshot_$(date +%Y-%m-%d_%H-%M-%S)"
+
+      # Create snapshot
+      echo "[+] Starting Snapshot"
+      /usr/local/apache-cassandra/bin/nodetool snapshot -t $snap_name > /tmp/snapshot2s3.log 2>&1
+      if [ $? != 0 ] ; then
+        echo "Error during snapshot, please check manually, cleaning before exit"
+        alert_failure "Error during snaptshot:\n$(cat /tmp/snapshot2s3.log)"
+        clean
+        release_lock
+        exit 1
+      fi
+      cat /tmp/snapshot2s3.log
+
+      # Create temporary folder
+      find /var/lib/cassandra/data -name $snap_name -exec mkdir -p /snap/{} \;
+
+      # Make snapshot symlinks
+      cd /snap
+      for i in $(find . -name $snap_name | sed 's/^.\///') ; do
+        rmdir /snap/$i
+        ln -s /$i /snap/$i
+      done
+
+      # Dump schemas
+      mkdir -p /snap/var/lib/cassandra/schemas
+      for schema in $(cqlsh -e "select keyspace_name from system_schema.keyspaces;" | egrep "^\s+" | awk '{ print $1 }' | grep -v keyspace_name) ; do
+        cqlsh -e "describe keyspace ${schema}" > /snap/var/lib/cassandra/schemas/${schema}.cql
+        if [ $? != 0 ] ; then
+          echo "Error while dumping schema ${schema}"
+          alert_failure "Error while dumping ${schema} schema"
+          clean
+          release_lock
+          exit 1
+        fi
+      done
+
+      # Transfer with duplicity
+      echo "[+] Running duplicity to transfer to AWS"
+      duplicity --archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 full . s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname) > /tmp/snapshot2s3.log 2>&1
+      if [ $? != 0 ] ; then
+        echo "Error while backuping $CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+        alert_failure "Error with duplicity\n$(cat /tmp/snapshot2s3.log)"
+      fi
+      cat /tmp/snapshot2s3.log
+
+      # Clean snapshot
+      clean
+      release_lock
+    }
+
+    function restore() {
+      create_lock
+
+      echo "[+] Running duplicity to restore from AWS"
+      duplicity --archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 --time $RESTORE_TIME s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname) /var/lib/cassandra/restore > /tmp/snapshot2s3.log 2>&1
+      if [ $? != 0 ] ; then
+        echo "Error while restoring $CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+        alert_failure "Error with duplicity\n$(cat /tmp/snapshot2s3.log)"
+      fi
+      cat /tmp/snapshot2s3.log
+
+      # Clean snapshot
+      clean
+      release_lock
+    }
+
+    function list() {
+      duplicity --archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 collection-status s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)
+    }
+
+    function help() {
+      echo "Usage: $0 [backup|restore|list] AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_PASSPHRASE AWS_BUCKET [RESTORE_TIME]"
+      exit 1
+    }
+
+    # Check number of args
+    test "$#" -lt 5 && help
+
+    source /usr/local/apache-cassandra/scripts/envVars.sh
+    export AWS_ACCESS_KEY_ID=$2
+    export AWS_SECRET_ACCESS_KEY=$3
+    export PASSPHRASE=$4
+    export AWS_BUCKET=$5
+    export RESTORE_TIME=$6
+
+    if [ $1 == "backup" ] ; then
+      backup
+    elif [ $1 == "restore" ] ; then
+      test "$#" -ne 6 && help
+      restore
+    elif [ $1 == "list" ] ; then
+      list
+    else
+      echo "Don't know what to do, please look help at ./$0"
+    fi
+  cassandra-restore.sh: |-
+    #!/bin/bash
+
+    function help() {
+      echo "Usage: $0 <restore_data_folder> <keyspace> [<table>]"
+      echo '* restore_data_folder: the data folder restored from snapshot2s3.sh script'
+      echo '* keyspace: the keyspace to restore'
+      echo '* table: (optional field) the table name to restore (without uuid). If not set, all tables from a keyspace will be restored'
+      exit 1
+    }
+
+    function restore_table() {
+      ks=$1
+      tb=$2
+      echo -e "\n[+] Restoring ${ks}/${tb}"
+      /usr/local/apache-cassandra/bin/sstableloader -d $(hostname -A) ${ks}/${tb}
+    }
+
+    # Check number of args
+    test "$1" == 'help' && help
+    test "$#" -gt 1 || help
+
+    source /usr/local/apache-cassandra/scripts/envVars.sh
+    RESTORE_DATA_FOLDER=$1
+    KEYSPACE=$2
+    TABLE=$3
+
+    # Ensure $RESTORE_DATA_FOLDER exist
+    if [ ! -d $RESTORE_DATA_FOLDER ] ; then
+      echo "$RESTORE_DATA_FOLDER doesn't exist, please check"
+      exit 1
+    fi
+    cd $RESTORE_DATA_FOLDER
+
+    # Ensure $KEYSPACE is present
+    if [ ! -d $KEYSPACE ] ; then
+      echo "$KEYSPACE is not found in $RESTORE_DATA_FOLDER folder, please ensure you've specified the data folder of the restore folder"
+      exit 1
+    fi
+
+    # Restore schema ?
+    echo 'Do you want to restore schema as well (y/n) ? (required for empty cassandra)'
+    read restore_schema
+    if [ "$restore_schema" != 'y' ] ; then
+      echo 'You decided to not restore schema'
+    else
+      echo 'You decided to restore schema'
+    fi
+
+    echo -e "\n[+]You're going to restore $KEYSPACE keyspace"
+    echo "Hit enter key when you're ready to proceed"
+    read
+
+    echo "[+] Flushing data to disk"
+    /usr/local/apache-cassandra/bin/nodetool flush
+
+    # Restore schema
+    if [ "$restore_schema" == 'y' ] ; then
+      if [ -f ../schemas/${KEYSPACE}.cql ] ; then
+        echo "[+] Restoring schema ${KEYSPACE}"
+        cqlsh < ../schemas/${KEYSPACE}.cql
+      else
+        echo "[+] SCHEMA ${KEYSPACE} MISSING !!! CAN'T RESTORE"
+      fi
+    fi
+
+    # Prepare snapshot to make it usable with sstableloader
+    for current_table in $(ls $KEYSPACE) ; do
+      table_name_path="$(find ./${KEYSPACE}/$current_table -name "snapshot_*")"
+      if [ "$(echo $table_name_path)" != "" ] ; then
+        echo "[+] Preparing ${KEYSPACE}/${current_table}"
+        table_name=$(echo $table_name_path | awk -F'/' '{ print $3 }' | sed -r 's/(\w+)-.*/\1/')
+        table_name_uuid=$(echo $table_name_path | sed -r 's/(.+)\/snapshots\/.+/\1/')
+        mv -v $table_name_path ${KEYSPACE}/$table_name
+        rm -Rf $table_name_uuid
+      fi
+    done
+
+    # Restore all tables or the desired one
+    if [ "$TABLE" == '' ] ; then
+      # Restore
+      for table_name in $(ls $KEYSPACE) ; do
+          restore_table $KEYSPACE $table_name
+      done
+    else
+      restore_table $KEYSPACE $TABLE
+    fi
+
+    echo "[+] Restore finished"
+  exporter_run_override.sh: |-
+    #!/bin/bash
+    cp -f /usr/local/apache-cassandra/scripts/exporter_config.yml /etc/cassandra_exporter/config.yml
+    /run.sh
+  exporter_config.yml: |-
+    host: localhost:7199
+    ssl: False
+    user:
+    password:
+    listenPort: 8080
+    blacklist:
+       # To profile the duration of jmx call you can start the program with the following options
+       # > java -Dorg.slf4j.simpleLogger.defaultLogLevel=trace -jar cassandra_exporter.jar config.yml --oneshot
+       #
+       # To get intuition of what is done by cassandra when something is called you can look in cassandra
+       # https://github.com/apache/cassandra/tree/trunk/src/java/org/apache/cassandra/metrics
+       # Please avoid to scrape frequently those calls that are iterating over all sstables
+
+       # Unaccessible metrics (not enough privilege)
+       - java:lang:memorypool:.*usagethreshold.*
+
+       # Leaf attributes not interesting for us but that are presents in many path
+       - .*:999thpercentile
+       - .*:95thpercentile
+       - .*:fifteenminuterate
+       - .*:fiveminuterate
+       - .*:durationunit
+       - .*:rateunit
+       - .*:stddev
+       - .*:meanrate
+       - .*:mean
+       - .*:min
+
+       # Path present in many metrics but uninterresting
+       - .*:viewlockacquiretime:.*
+       - .*:viewreadtime:.*
+       - .*:cas[a-z]+latency:.*
+       - .*:colupdatetimedeltahistogram:.*
+
+       # Mostly for RPC, do not scrap them
+       - org:apache:cassandra:db:.*
+
+       # columnfamily is an alias for Table metrics
+       # https://github.com/apache/cassandra/blob/8b3a60b9a7dbefeecc06bace617279612ec7092d/src/java/org/apache/cassandra/metrics/TableMetrics.java#L162
+       - org:apache:cassandra:metrics:columnfamily:.*
+
+       # Should we export metrics for system keyspaces/tables ?
+       - org:apache:cassandra:metrics:[^:]+:system[^:]*:.*
+
+       # Don't scrap us
+       - com:criteo:nosql:cassandra:exporter:.*
+    maxScrapFrequencyInSec:
+      50:
+        - org:apache:cassandra:metrics:table:.*
+        - org:apache:cassandra:metrics:CQL:.*
+        - org:apache:cassandra:metrics:ClientRequest:.*
+      # Refresh those metrics only every hour as it is costly for cassandra to retrieve them
+      3600:
+        - .*:snapshotssize:.*
+        - .*:estimated.*
+        - .*:totaldiskspaceused:.*
+
+---
+# Source: cassandra/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra
+  namespace: default
+  annotations:
+    # https://github.com/kubernetes/examples/issues/89
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    app: cassandra
+    chart: cassandra-0.9.2
+    release: RELEASE-NAME
+    heritage: Tiller
+spec:
+  clusterIP: None
+  ports:
+    - port: 9042
+      name: cassandra
+    - name: jmx
+      port: 7199
+    - name: metrics
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: jmx-exporter
+      port: 5555
+      targetPort: 5555
+  selector:
+    app: cassandra
+---
+# Source: cassandra/templates/statefulset.yaml
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: cassandra
+  namespace: default
+  labels:
+    app: cassandra
+    chart: cassandra-0.9.2
+    release: RELEASE-NAME
+    heritage: Tiller
+spec:
+  serviceName: cassandra
+  updateStrategy:
+    type: "RollingUpdate"
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: cassandra
+        chart: cassandra-0.9.2
+        release: RELEASE-NAME
+        heritage: Tiller
+    spec:
+      subdomain: cassandra
+      terminationGracePeriodSeconds: 1800
+      containers:
+        - name: cassandra
+          image: quay.io/mysocialapp/cassandra:3.11.1-9
+          command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/run_override.sh']
+          env:
+            
+            - name: HEAP_NEWSIZE
+              value: 256M
+            - name: CASSANDRA_NUM_TOKENS
+              value: "256"
+            - name: CASSANDRA_CLUSTER_NAME
+              value: "default"
+            - name: CASSANDRA_RACK
+              value: "Rack1"
+            - name: CASSANDRA_DC
+              value: "DC1"
+            - name: CASSANDRA_LISTEN_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CASSANDRA_BROADCAST_RPC_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CASSANDRA_BROADCAST_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CASSANDRA_CONCURRENT_WRITES
+              value: "1024"
+            - name: CASSANDRA_CONCURRENT_READS
+              value: "1024"
+            - name: CASSANDRA_CONCURRENT_COMPACTORS
+              value: "2"
+            - name: CASSANDRA_YAML_batch_size_warn_threshold_in_kb
+              value: "64"
+            - name: CASSANDRA_YAML_batch_size_fail_threshold_in_kb
+              value: "640"
+            - name: CASSANDRA_COMPACTION_THROUGHPUT_MB_PER_SEC
+              value: "150"
+            - name: CASSANDRA_YAML_hinted_handoff_throttle_in_kb
+              value: "4096"
+            - name: CASSANDRA_YAML_max_hints_delivery_threads
+              value: "4"
+            - name: CASSANDRA_MEMTABLE_ALLOCATION_TYPE
+              value: offheap_objects
+            - name: CASSANDRA_MEMTABLE_FLUSH_WRITERS
+              value: "4"
+            - name: CASSANDRA_MEMTABLE_CLEANUP_THRESHOLD
+              value: "0.2"
+            - name: CASSANDRA_YAML_row_cache_size_in_mb
+              value: "128"
+            - name: CASSANDRA_YAML_row_cache_save_period
+              value: "14400"
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+                - SYS_RESOURCE
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/usr/local/apache-cassandra/scripts/postStart.sh"]
+            preStop:
+              exec:
+                command: ["/usr/local/apache-cassandra/scripts/preStop.sh"]
+          readinessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - /ready-probe.sh
+            initialDelaySeconds: 180
+            timeoutSeconds: 30
+          ports:
+            - containerPort: 7000
+              name: intra-node
+            - containerPort: 7001
+              name: tls-intra-node
+            - containerPort: 7199
+              name: jmx
+            - containerPort: 9042
+              name: cql
+          resources:
+            limits: null
+            requests:
+              memory: 2400Mi
+            
+          volumeMounts:
+            - name: cass-persistent-storage-claim
+              mountPath: /var/lib/cassandra
+            - name: cassandra
+              mountPath: /usr/local/apache-cassandra/scripts
+        - name: cassandra-exporter
+          image: "criteord/cassandra_exporter:latest"
+          command: ['/sbin/dumb-init', '/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/exporter_run_override.sh']
+          env:
+            - name: CASSANDRA_EXPORTER_CONFIG_host
+              value: "127.0.0.1:7199"
+            - name: CASSANDRA_EXPORTER_CONFIG_listenPort
+              value: "8080"
+            - name: JVM_OPTS
+              value: "
+                      -XX:MaxRAMFraction=1
+                      -XX:+AlwaysPreTouch
+                      -Dorg.slf4j.simpleLogger.showDateTime=true
+                      -Dorg.slf4j.simpleLogger.dateTimeFormat=\"yyyy-MM-dd'T'HH:mm:ss\"
+                      -Dcom.sun.management.jmxremote.ssl=false
+                      -Dcom.sun.management.jmxremote.authenticate=false
+                      -Dcom.sun.management.jmxremote.port=5555
+                      -Dcom.sun.management.jmxremote.local.only=false
+                      -Dnetworkaddress.cache.ttl=15"
+          ports:
+          - name: metrics
+            containerPort: 8080
+            protocol: TCP
+          - name: jmx
+            containerPort: 5555
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 45
+          resources:
+            limits:
+              cpu: 300m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            
+          volumeMounts:
+            - name: cassandra
+              mountPath: /usr/local/apache-cassandra/scripts
+      volumes:
+        - name: cassandra
+          configMap:
+            name: cassandra
+            defaultMode: 0775
+  volumeClaimTemplates:
+  - metadata:
+      name: cass-persistent-storage-claim
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "cass"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 50Gi
+
+---
+# Source: cassandra/templates/pdb.yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: cassandra
+  namespace: default
+  labels:
+    app: cassandra
+    chart: cassandra-0.9.2
+    release: RELEASE-NAME
+    heritage: Tiller
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: cassandra
