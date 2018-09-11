@@ -1,7 +1,7 @@
 import time
 import os
 import logging
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.policies import DCAwareRoundRobinPolicy
 import cass_queries as cstr
 import conf
@@ -20,6 +20,10 @@ table_create_query_dict = {
 }
 
 
+class DBDriverConnectionException(Exception):
+    pass
+
+
 class CassandraDriver:
     def __init__(self, keyspace, table_name=None, hosts=('localhost',)):
         self.cluster = None
@@ -31,7 +35,10 @@ class CassandraDriver:
         logging.info("Creating driver to Cassandra cluster %s with keyspace %s and table %s",
                       self.hosts, self.keyspace, self.table_name)
 
-        self._create_session()
+        try:
+            self._create_session()
+        except NoHostAvailable as e:
+            raise DBDriverConnectionException(e)
         self._create_table()
 
     def __del__(self):
@@ -85,16 +92,28 @@ cass_drivers = {}
 cass_lock = threading.Lock()
 
 
-def get_db_driver(keyspace, table_name):
+def _get_db_driver(keyspace, table_name):
     cass_lock.acquire()
-    key = (keyspace, table_name)
-    if key in cass_drivers:
-        cass_driver = cass_drivers[key]
-        logging.debug("cass driver exists!")
-    else:
-        time.sleep(5)  # TODO: Remove!
-        cass_driver = CassandraDriver(keyspace, table_name=table_name, hosts=CASSANDRA_HOSTS)
-        cass_drivers[key] = cass_driver
-        logging.info("Created new cass driver with keyspace %s and table %s!", keyspace, table_name)
-    cass_lock.release()
+    try:
+        key = (keyspace, table_name)
+        if key in cass_drivers:
+            cass_driver = cass_drivers[key]
+            logging.debug("cass driver exists!")
+        else:
+            time.sleep(5)  # TODO: Remove!
+            cass_driver = CassandraDriver(keyspace, table_name=table_name, hosts=CASSANDRA_HOSTS)
+            cass_drivers[key] = cass_driver
+            logging.info("Created new cass driver with keyspace %s and table %s!", keyspace, table_name)
+    finally:
+        cass_lock.release()
     return cass_driver
+
+
+def get_db_driver(keyspace, table_name):
+    """Get the db driver with infinite retrying if catching connection exception."""
+    while True:
+        try:
+            return _get_db_driver(keyspace, table_name)
+        except DBDriverConnectionException as e:
+            logging.error("Retry in 10 seconds to connect to DB due to connection error: %s", e)
+            time.sleep(10)
