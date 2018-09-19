@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-cass-user
+  labels:
+    app: twitter-cass-user
+spec:
+  type: ClusterIP
+  ports:
+    - port: 50051
+      targetPort: 50051
+      protocol: TCP
+      name: grpc-twitter-cass-user
+  selector:
+    app: twitter-cass-user
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-cass-tweet
+  labels:
+    app: twitter-cass-tweet
+spec:
+  type: ClusterIP
+  ports:
+    - port: 50052
+      targetPort: 50052
+      protocol: TCP
+      name: grpc-twitter-cass-tweet
+  selector:
+    app: twitter-cass-tweet
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-cass-friend
+  labels:
+    app: twitter-cass-friend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 50053
+      targetPort: 50053
+      protocol: TCP
+      name: grpc-twitter-cass-friend
+  selector:
+    app: twitter-cass-friend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-cass-api
+  labels:
+    app: twitter-cass-api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8699
+      targetPort: 8699
+      protocol: TCP
+      name: http-twitter-cass-api
+  selector:
+    app: twitter-cass-api
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-cass-user
+  labels:
+    app: twitter-cass-user
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: twitter-cass-user
+    spec:
+      containers:
+        - name: twitter-cass-user
+          image: "maxwang/twitter-cass-user:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50051
+          env:
+          - name: CASSANDRA_HOST_ADDRESS
+            value: "cassandra-0.cassandra.default.svc.cluster.local"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-cass-tweet
+  labels:
+    app: twitter-cass-tweet
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: twitter-cass-tweet
+    spec:
+      containers:
+        - name: twitter-cass-tweet
+          image: "maxwang/twitter-cass-tweet:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50052
+          env:
+          - name: CASSANDRA_HOST_ADDRESS
+            value: "cassandra-0.cassandra.default.svc.cluster.local"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-cass-friend
+  labels:
+    app: twitter-cass-friend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: twitter-cass-friend
+    spec:
+      containers:
+        - name: twitter-cass-friend
+          image: "maxwang/twitter-cass-friend:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50053
+          env:
+          - name: CASSANDRA_HOST_ADDRESS
+            value: "cassandra-0.cassandra.default.svc.cluster.local"
+      restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-cass-api
+  labels:
+    app: twitter-cass-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: twitter-cass-api
+    spec:
+      containers:
+        - name: twitter-cass-api
+          image: "maxwang/twitter-cass-api:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8699
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      restartPolicy: Always
