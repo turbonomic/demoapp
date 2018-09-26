@@ -10,6 +10,8 @@ USER_SERVICE_HOST = os.getenv('TWITTER_CASS_USER_SERVICE_HOST', 'localhost')
 USER_SERVICE_PORT = os.getenv('TWITTER_CASS_USER_SERVICE_PORT', '50051')
 CHANNEL_ADDR = '{}:{}'.format(USER_SERVICE_HOST, USER_SERVICE_PORT)
 
+username_cache = {}
+
 
 class UserService:
     def __init__(self):
@@ -21,10 +23,20 @@ class UserService:
         self.channel.close()
 
     def name(self, user_id):
+        if user_id in username_cache:
+            return username_cache[user_id]
+
         user = self.stub.GetUser(user_service_pb2.GetUserRequest(user_id=user_id))
+        username_cache[user_id] = user.name
         return user.name
 
     def names(self, user_ids):
+        if len(user_ids) == 0:
+            return []
+
+        if all(user_id in username_cache for user_id in user_ids):
+            return [username_cache[user_id] for user_id in user_ids]
+
         request = user_service_pb2.GetUsersRequest()
         request.user_ids[:] = user_ids
         users = self.stub.GetUsers(request)
