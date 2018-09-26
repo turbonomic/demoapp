@@ -103,7 +103,7 @@ def logout():
 def timeline():
     user_id = request.cookies.get(USER_ID)
     user_id = int(user_id)
-    logging.info('User %d requests timeline', user_id)
+    logging.debug('User %d requests timeline', user_id)
     followees = friend_svc.followees(user_id)
     logging.debug('User %d is followed by %d users', user_id, len(followees))
     tweets = tweet_svc.timeline(user_id, followees)
@@ -121,7 +121,7 @@ def timeline():
 def newsfeed():
     user_id = request.cookies.get(USER_ID)
     user_id = int(user_id)
-    logging.info('User %d requests news feed', user_id)
+    logging.debug('User %d requests news feed', user_id)
     tweets = tweet_svc.news_feed(user_id)
 
     user_name = user_svc.name(user_id)
@@ -137,7 +137,7 @@ def tweet():
     user_id = request.cookies.get(USER_ID)
     user_id = int(user_id)
     content = request.form['content']
-    logging.info('User %d said %s', user_id, str(content))
+    logging.debug('User %d said %s', user_id, str(content))
     tweet_id = tweet_svc.tweet(user_id, content)
     logging.debug('User %d said with tweet id %d', user_id, tweet_id)
     return redirect(url_for('newsfeed'))
@@ -149,7 +149,7 @@ def follows():
     from_id = request.cookies.get(USER_ID)
     from_id = int(from_id)
     to_id = int(request.form['id_to_follow'])
-    logging.info('User %d requests following user %d', from_id, to_id)
+    logging.debug('User %d requests following user %d', from_id, to_id)
     if from_id == to_id:
         return make_response("Invalid followee id {}".format(to_id), 400)
 

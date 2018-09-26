@@ -25,7 +25,7 @@ class TweetService:
         return res.tweet_id
 
     def timeline(self, user_id, followees):
-        logging.info("User %d follows %d people" % (user_id, len(followees)))
+        logging.debug("User %d follows %d people" % (user_id, len(followees)))
         tr = tweet_service_pb2.TimelineRequest(user_id=user_id)
         tr.followees[:] = followees
         # TODO: implement streaming
