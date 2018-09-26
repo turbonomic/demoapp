@@ -18,7 +18,7 @@ To deploy the testbed, follow the steps below.
    
 **2. Deploy Cassandra Cluster and Exporter** :
    * Use the [`yaml file`](./cassandra/cass.yaml) to deploy Cassandra and its exporter;
-   * The yaml file above is modified from [`here`](https://github.com/MySocialApp/kubernetes-helm-chart-cassandra)
+   (See detail [`here`](https://github.com/MySocialApp/kubernetes-helm-chart-cassandra))
    * Note: depending on the cloud provider, additional instructions may be needed for the persistent disks/volumes;
 
 **3. Deploy Twitter App** :
@@ -42,7 +42,8 @@ To deploy the testbed, follow the steps below.
    * [`Deploy Prometurbo`](https://github.com/turbonomic/prometurbo/tree/master/deploy)
 
 **6. Deploy User Simulator (Locust)** :
-   * Run locally: [`install Locust`](https://docs.locust.io/en/stable/installation.html) locally. 
+   * *Run locally*: [`install Locust`](https://docs.locust.io/en/stable/installation.html) locally. 
    Replace *$API_SERVICE_IP* in [`local_run.sh`](./locust/local_run.sh) with the public IP of the twitter app. 
    Run the script and browse its [`UI`](http://localhost:8089) to start the simulation.
-   * Option 2: Run Locust cluster
+   * *Locust cluster*: Deploy the Locust cluster with the [`locust-cluster.yaml`](./locust/locust-cluster.yaml) after configuring the IP fields inside.
+               See more detail [`here`](https://github.com/GoogleCloudPlatform/distributed-load-testing-using-kubernetes).
