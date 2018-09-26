@@ -11,7 +11,7 @@ spec:
   storageClassName: cass
   gcePersistentDisk:
     fsType: ext4
-    pdName: pd-cass-disk-100g-0
+    pdName: pd-cass-testbed-disk-100g-0
 ---
 apiVersion: "v1"
 kind: "PersistentVolume"
@@ -26,4 +26,5 @@ spec:
   storageClassName: cass
   gcePersistentDisk:
     fsType: ext4
-    pdName: pd-cass-disk-100g-1
+    pdName: pd-cass-testbed-disk-100g-1
+

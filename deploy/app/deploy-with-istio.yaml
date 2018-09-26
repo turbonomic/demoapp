@@ -84,8 +84,8 @@ spec:
       - env:
         - name: CASSANDRA_HOST_ADDRESS
           value: cassandra-0.cassandra.default.svc.cluster.local
-        image: maxwang/twitter-cass-user:latest
-        imagePullPolicy: Always
+        image: maxwang/twitter-cass-user:0.6
+        imagePullPolicy: IfNotPresent
         name: twitter-cass-user
         ports:
         - containerPort: 50051
@@ -216,8 +216,8 @@ spec:
       - env:
         - name: CASSANDRA_HOST_ADDRESS
           value: cassandra-0.cassandra.default.svc.cluster.local
-        image: maxwang/twitter-cass-tweet:latest
-        imagePullPolicy: Always
+        image: maxwang/twitter-cass-tweet:0.6
+        imagePullPolicy: IfNotPresent
         name: twitter-cass-tweet
         ports:
         - containerPort: 50052
@@ -348,8 +348,8 @@ spec:
       - env:
         - name: CASSANDRA_HOST_ADDRESS
           value: cassandra-0.cassandra.default.svc.cluster.local
-        image: maxwang/twitter-cass-friend:latest
-        imagePullPolicy: Always
+        image: maxwang/twitter-cass-friend:0.6
+        imagePullPolicy: IfNotPresent
         name: twitter-cass-friend
         ports:
         - containerPort: 50053
@@ -471,8 +471,8 @@ spec:
         app: twitter-cass-api
     spec:
       containers:
-      - image: maxwang/twitter-cass-api:latest
-        imagePullPolicy: Always
+      - image: maxwang/twitter-cass-api:0.6
+        imagePullPolicy: IfNotPresent
         name: twitter-cass-api
         ports:
         - containerPort: 8699

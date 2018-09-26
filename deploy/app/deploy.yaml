@@ -77,8 +77,8 @@ spec:
     spec:
       containers:
         - name: twitter-cass-user
-          image: "maxwang/twitter-cass-user:latest"
-          imagePullPolicy: Always
+          image: "maxwang/twitter-cass-user:0.6"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50051
           env:
@@ -108,8 +108,8 @@ spec:
     spec:
       containers:
         - name: twitter-cass-tweet
-          image: "maxwang/twitter-cass-tweet:latest"
-          imagePullPolicy: Always
+          image: "maxwang/twitter-cass-tweet:0.6"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50052
           env:
@@ -139,8 +139,8 @@ spec:
     spec:
       containers:
         - name: twitter-cass-friend
-          image: "maxwang/twitter-cass-friend:latest"
-          imagePullPolicy: Always
+          image: "maxwang/twitter-cass-friend:0.6"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50053
           env:
@@ -163,8 +163,8 @@ spec:
     spec:
       containers:
         - name: twitter-cass-api
-          image: "maxwang/twitter-cass-api:latest"
-          imagePullPolicy: Always
+          image: "maxwang/twitter-cass-api:0.6"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8699
           resources:

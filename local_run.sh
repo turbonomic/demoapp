@@ -15,5 +15,7 @@ python tweet_service/tweet_service_grpc.py >> logs/log.txt &
 
 python friend_service/friend_service_grpc.py >> logs/log.txt &
 
+open http://0.0.0.0:8699
+
 tail -f logs/log.txt
 

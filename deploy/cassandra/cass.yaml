@@ -402,7 +402,7 @@ spec:
   serviceName: cassandra
   updateStrategy:
     type: "RollingUpdate"
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
@@ -413,6 +413,11 @@ spec:
     spec:
       subdomain: cassandra
       terminationGracePeriodSeconds: 1800
+      tolerations:
+      - key: "key-cass-only"
+        operator: "Equal"
+        value: "cass-only"
+        effect: "NoExecute"
       containers:
         - name: cassandra
           image: quay.io/mysocialapp/cassandra:3.11.1-9
@@ -446,9 +451,9 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: CASSANDRA_CONCURRENT_WRITES
-              value: "1024"
+              value: "128"
             - name: CASSANDRA_CONCURRENT_READS
-              value: "1024"
+              value: "128"
             - name: CASSANDRA_CONCURRENT_COMPACTORS
               value: "2"
             - name: CASSANDRA_YAML_batch_size_warn_threshold_in_kb
@@ -504,6 +509,7 @@ spec:
             limits: null
             requests:
               memory: 2400Mi
+              cpu: 600m
             
           volumeMounts:
             - name: cass-persistent-storage-claim
@@ -550,7 +556,7 @@ spec:
               memory: 500Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 100Mi
             
           volumeMounts:
             - name: cassandra
