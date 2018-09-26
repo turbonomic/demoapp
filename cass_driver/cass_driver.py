@@ -9,6 +9,7 @@ import threading
 
 CASSANDRA_HOSTS = [os.getenv('CASSANDRA_HOST_ADDRESS', 'localhost')]
 CASSANDRA_PORT = os.getenv('CASSANDRA_PORT', 9042)
+SESSION_POOL_SIZE = int(os.getenv('SESSION_POOL_SIZE', 1))
 DC = 'DC1'
 
 
@@ -17,6 +18,8 @@ table_create_query_dict = {
         table_name=conf.TWITTER_TWEET_TABLE_NAME),
     conf.TWITTER_FRIEND_TABLE_NAME: cstr.q_create_tweet_friend_table_temp.substitute(
         table_name=conf.TWITTER_FRIEND_TABLE_NAME),
+    conf.TWITTER_SESSION_TABLE_NAME: cstr.q_create_session_table_temp.substitute(
+        table_name=conf.TWITTER_SESSION_TABLE_NAME),
 }
 
 
@@ -28,9 +31,11 @@ class CassandraDriver:
     def __init__(self, keyspace, table_name=None, hosts=('localhost',)):
         self.cluster = None
         self.session = None
+        self.session_pool = []
         self.hosts = list(hosts)
         self.keyspace = keyspace
         self.table_name = table_name
+        self.session_idx = 0
 
         logging.info("Creating driver to Cassandra cluster %s with keyspace %s and table %s",
                       self.hosts, self.keyspace, self.table_name)
@@ -44,6 +49,11 @@ class CassandraDriver:
     def __del__(self):
         self.cluster.shutdown()
 
+    def _get_session(self):
+        self.session_idx = (self.session_idx + 1) % len(self.session_pool)
+        logging.debug("session_idx=%d", self.session_idx)
+        return self.session_pool[self.session_idx]
+
     def _create_session(self):
         self.cluster = Cluster(
             self.hosts,
@@ -53,6 +63,15 @@ class CassandraDriver:
         # create the keyspace if not exist
         self._create_keyspace()
         self.session = self.cluster.connect(self.keyspace)
+        self.session_pool.append(self.cluster.connect(self.keyspace))
+
+        # create multiple sessions
+        for i in range(SESSION_POOL_SIZE - 1):
+            cluster = Cluster(
+                self.hosts,
+                load_balancing_policy=DCAwareRoundRobinPolicy(local_dc=DC),
+                port=CASSANDRA_PORT)
+            self.session_pool.append(cluster.connect(self.keyspace))
 
     def _create_keyspace(self):
         keyspace = self.keyspace
@@ -76,15 +95,14 @@ class CassandraDriver:
         else:
             logging.error("Creating table %s is not supported", self.table_name)
 
-    def execute(self, query_template, params, is_async=False):
+    def execute(self, query_template, params, is_async=False, timeout=None):
         q = query_template.substitute(params)
 
         logging.debug("q=%s", q)
 
-        if is_async:
-            return self.session.execute_async(q)
-
-        return self.session.execute(q)
+        session = self._get_session()
+        f = session.execute_async if is_async else session.execute
+        return f(q, timeout=timeout) if timeout else f(q)
 
 
 # Driver cache
