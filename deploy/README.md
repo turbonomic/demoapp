@@ -23,8 +23,13 @@ To deploy the testbed, follow the steps below.
 
 **3. Deploy Twitter App** :
    * Use the [`yaml file`](./app/deploy-with-istio.yaml) to deploy the container pods with Istio injected;
-   * Once deployed, users can go to *http://<APP_IP>:8699* and login with username as any positive number, 
-   e.g., 100 and password same as the username.
+   * Set up the Istio ingress gateway for requests outside the cluster by deploying the [`yaml file`](./app/setup-istio-gateway.yaml)
+   * Once deployed, users can visit the website at *http://<APP_IP>* where APP_IP is the ingress IP of the istio ingress gateway, which
+     can be found by:
+     ```console
+     kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+     ```
+   * Then, login with username as any positive integer, e.g., 100 and password same as the username.
 
 **4. Configure Istio/Prometheus/Grafana** :
    * Deploy the [`yaml file`](./metrics/ip.turbo.metric.yaml) for the Istio/Prometheus integration;
