@@ -53,7 +53,7 @@ metadata:
   labels:
     app: twitter-cass-api
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 8699
       targetPort: 8699
@@ -75,7 +75,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/status: '{"version":"55ca84b79cb5036ec3e54a3aed83cd77973cdcbed6bf653ff7b4f82659d68b1e","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
+        sidecar.istio.io/status: '{"version":"48f39c4792663fa70ea9c6eb9c29612031cbe36a3850b41faa407da434ec11d3","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
       creationTimestamp: null
       labels:
         app: twitter-cass-user
@@ -117,8 +117,6 @@ spec:
         - zipkin.istio-system:9411
         - --connectTimeout
         - 10s
-        - --statsdUdpAddress
-        - istio-statsd-prom-bridge.istio-system:9125
         - --proxyAdminPort
         - "15000"
         - --controlPlaneAuthPolicy
@@ -142,14 +140,19 @@ spec:
               fieldPath: metadata.name
         - name: ISTIO_META_INTERCEPTION_MODE
           value: REDIRECT
-        image: docker.io/istio/proxyv2:1.0.0
+        - name: ISTIO_META_app
+          value: twitter-cass-user
+        image: docker.io/istio/proxyv2:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-proxy
+        ports:
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
         resources:
           requests:
             cpu: 10m
         securityContext:
-          privileged: false
           readOnlyRootFilesystem: true
           runAsUser: 1337
         volumeMounts:
@@ -171,10 +174,10 @@ spec:
         - -x
         - ""
         - -b
-        - 50051,
+        - "50051"
         - -d
         - ""
-        image: docker.io/istio/proxy_init:1.0.0
+        image: docker.io/istio/proxy_init:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-init
         resources: {}
@@ -207,7 +210,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/status: '{"version":"55ca84b79cb5036ec3e54a3aed83cd77973cdcbed6bf653ff7b4f82659d68b1e","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
+        sidecar.istio.io/status: '{"version":"48f39c4792663fa70ea9c6eb9c29612031cbe36a3850b41faa407da434ec11d3","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
       creationTimestamp: null
       labels:
         app: twitter-cass-tweet
@@ -249,8 +252,6 @@ spec:
         - zipkin.istio-system:9411
         - --connectTimeout
         - 10s
-        - --statsdUdpAddress
-        - istio-statsd-prom-bridge.istio-system:9125
         - --proxyAdminPort
         - "15000"
         - --controlPlaneAuthPolicy
@@ -274,14 +275,19 @@ spec:
               fieldPath: metadata.name
         - name: ISTIO_META_INTERCEPTION_MODE
           value: REDIRECT
-        image: docker.io/istio/proxyv2:1.0.0
+        - name: ISTIO_META_app
+          value: twitter-cass-tweet
+        image: docker.io/istio/proxyv2:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-proxy
+        ports:
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
         resources:
           requests:
             cpu: 10m
         securityContext:
-          privileged: false
           readOnlyRootFilesystem: true
           runAsUser: 1337
         volumeMounts:
@@ -303,10 +309,10 @@ spec:
         - -x
         - ""
         - -b
-        - 50052,
+        - "50052"
         - -d
         - ""
-        image: docker.io/istio/proxy_init:1.0.0
+        image: docker.io/istio/proxy_init:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-init
         resources: {}
@@ -339,7 +345,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/status: '{"version":"55ca84b79cb5036ec3e54a3aed83cd77973cdcbed6bf653ff7b4f82659d68b1e","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
+        sidecar.istio.io/status: '{"version":"48f39c4792663fa70ea9c6eb9c29612031cbe36a3850b41faa407da434ec11d3","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
       creationTimestamp: null
       labels:
         app: twitter-cass-friend
@@ -375,8 +381,6 @@ spec:
         - zipkin.istio-system:9411
         - --connectTimeout
         - 10s
-        - --statsdUdpAddress
-        - istio-statsd-prom-bridge.istio-system:9125
         - --proxyAdminPort
         - "15000"
         - --controlPlaneAuthPolicy
@@ -400,14 +404,19 @@ spec:
               fieldPath: metadata.name
         - name: ISTIO_META_INTERCEPTION_MODE
           value: REDIRECT
-        image: docker.io/istio/proxyv2:1.0.0
+        - name: ISTIO_META_app
+          value: twitter-cass-friend
+        image: docker.io/istio/proxyv2:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-proxy
+        ports:
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
         resources:
           requests:
             cpu: 10m
         securityContext:
-          privileged: false
           readOnlyRootFilesystem: true
           runAsUser: 1337
         volumeMounts:
@@ -429,10 +438,10 @@ spec:
         - -x
         - ""
         - -b
-        - 50053,
+        - "50053"
         - -d
         - ""
-        image: docker.io/istio/proxy_init:1.0.0
+        image: docker.io/istio/proxy_init:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-init
         resources: {}
@@ -465,7 +474,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/status: '{"version":"55ca84b79cb5036ec3e54a3aed83cd77973cdcbed6bf653ff7b4f82659d68b1e","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
+        sidecar.istio.io/status: '{"version":"48f39c4792663fa70ea9c6eb9c29612031cbe36a3850b41faa407da434ec11d3","initContainers":["istio-init"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"],"imagePullSecrets":null}'
       creationTimestamp: null
       labels:
         app: twitter-cass-api
@@ -504,8 +513,6 @@ spec:
         - zipkin.istio-system:9411
         - --connectTimeout
         - 10s
-        - --statsdUdpAddress
-        - istio-statsd-prom-bridge.istio-system:9125
         - --proxyAdminPort
         - "15000"
         - --controlPlaneAuthPolicy
@@ -529,14 +536,19 @@ spec:
               fieldPath: metadata.name
         - name: ISTIO_META_INTERCEPTION_MODE
           value: REDIRECT
-        image: docker.io/istio/proxyv2:1.0.0
+        - name: ISTIO_META_app
+          value: twitter-cass-api
+        image: docker.io/istio/proxyv2:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-proxy
+        ports:
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
         resources:
           requests:
             cpu: 10m
         securityContext:
-          privileged: false
           readOnlyRootFilesystem: true
           runAsUser: 1337
         volumeMounts:
@@ -558,10 +570,10 @@ spec:
         - -x
         - ""
         - -b
-        - 8699,
+        - "8699"
         - -d
         - ""
-        image: docker.io/istio/proxy_init:1.0.0
+        image: docker.io/istio/proxy_init:1.0.3
         imagePullPolicy: IfNotPresent
         name: istio-init
         resources: {}
