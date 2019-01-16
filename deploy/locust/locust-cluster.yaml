@@ -59,11 +59,11 @@ spec:
             - name: VISIT_RATE_TWEET
               value: "1000"
             - name: VISIT_RATE_TIMELINE
-              value: "10"
-            - name: VISIT_RATE_NEWSFEED
-              value: "10"
-            - name: VISIT_RATE_FOLLOW
               value: "100"
+            - name: VISIT_RATE_NEWSFEED
+              value: "1000"
+            - name: VISIT_RATE_FOLLOW
+              value: "10"
             - name: NEXT_REQUEST_MIN_WAIT_MS
               value: "1000"
             - name: NEXT_REQUEST_MAX_WAIT_MS
@@ -118,11 +118,11 @@ spec:
             - name: VISIT_RATE_TWEET
               value: "1000"
             - name: VISIT_RATE_TIMELINE
-              value: "10"
-            - name: VISIT_RATE_NEWSFEED
-              value: "10"
-            - name: VISIT_RATE_FOLLOW
               value: "100"
+            - name: VISIT_RATE_NEWSFEED
+              value: "1000"
+            - name: VISIT_RATE_FOLLOW
+              value: "10"
             - name: NEXT_REQUEST_MIN_WAIT_MS
               value: "1000"
             - name: NEXT_REQUEST_MAX_WAIT_MS
