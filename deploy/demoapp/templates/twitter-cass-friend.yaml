@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: twitter-cass-friend
+  labels:
+    app: twitter-cass-friend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: twitter-cass-friend
+    spec:
+      containers:
+      - name: twitter-cass-friend
+        image: {{ .Values.image.repository }}/twitter-cass-friend:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - containerPort: 50053
+        env:
+        - name: CASSANDRA_HOST_ADDRESS
+          value: cassandra
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitter-cass-friend
+  labels:
+    app: twitter-cass-friend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 50053
+      targetPort: 50053
+      protocol: TCP
+      name: grpc-twitter-cass-friend
+  selector:
+    app: twitter-cass-friend

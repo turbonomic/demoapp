@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: twitter-cass-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: twitter-cass
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - twitter-cass-gateway
+  http:
+  - match:
+    - uri:
+        exact: /
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        exact: /setcookie
+    - uri:
+        exact: /timeline
+    - uri:
+        exact: /newsfeed
+    - uri:
+        exact: /tweet
+    - uri:
+        exact: /follows
+    route:
+    - destination:
+        host: twitter-cass-api
+        port:
+          number: 8699

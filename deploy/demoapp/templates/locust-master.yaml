@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: locust-master
+  labels:
+    name: locust
+    role: master
+spec:
+  type: NodePort
+  ports:
+    - port: 8089
+      nodePort: 30089
+      targetPort: loc-master-web
+      protocol: TCP
+      name: loc-master-web
+    - port: 5557
+      targetPort: loc-master-p1
+      protocol: TCP
+      name: loc-master-p1
+    - port: 5558
+      targetPort: loc-master-p2
+      protocol: TCP
+      name: loc-master-p2
+  selector:
+    name: locust
+    role: master
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: locust-master
+  labels:
+    name: locust
+    role: master
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: locust
+        role: master
+    spec:
+      containers:
+        - name: locust-master
+          image: {{ .Values.image.repository }}/locust:{{ .Values.image.locustTag }}
+          imagePullPolicy: {{ .Values.image.locustPullPolicy }}
+          env:
+            - name: LOCUST_MODE
+              value: master
+            - name: TARGET_HOST
+              # Replace the IP with the twitter app IP
+              # e.g., value: "http://35.237.107.176:8699"
+              value: "http://<IP>:8699"
+            - name: MAX_TWITTER_USER_ID
+              value: "101"
+            - name: MAX_NUM_FOLLOWS
+              value: "50"
+            - name: VISIT_RATE_TWEET
+              value: "1000"
+            - name: VISIT_RATE_TIMELINE
+              value: "100"
+            - name: VISIT_RATE_NEWSFEED
+              value: "1000"
+            - name: VISIT_RATE_FOLLOW
+              value: "10"
+            - name: NEXT_REQUEST_MIN_WAIT_MS
+              value: "1000"
+            - name: NEXT_REQUEST_MAX_WAIT_MS
+              value: "10000"
+#            - name: ENABLE_TIME_SLOT_PROBABILITY
+#              value: "1"
+            - name: LOCUSTFILE
+              value: "locustfile.py"
+          ports:
+            - name: loc-master-web
+              containerPort: 8089
+              protocol: TCP
+            - name: loc-master-p1
+              containerPort: 5557
+              protocol: TCP
+            - name: loc-master-p2
+              containerPort: 5558
+              protocol: TCP

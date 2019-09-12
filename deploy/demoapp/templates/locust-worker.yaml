@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: locust-worker
+  labels:
+    name: locust
+    role: worker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: locust
+        role: worker
+    spec:
+      containers:
+        - name: locust-worker
+          image: {{ .Values.image.repository }}/locust:{{ .Values.image.locustTag }}
+          imagePullPolicy: {{ .Values.image.locustPullPolicy }}
+          env:
+            - name: LOCUST_MODE
+              value: worker
+            - name: LOCUST_MASTER
+              value: locust-master
+            - name: TARGET_HOST
+              # Replace the IP with the twitter app IP
+              # e.g., value: "http://35.237.107.176:8699"
+              value: "http://<IP>:8699"
+            - name: MAX_TWITTER_USER_ID
+              value: "101"
+            - name: MAX_NUM_FOLLOWS
+              value: "50"
+            - name: VISIT_RATE_TWEET
+              value: "1000"
+            - name: VISIT_RATE_TIMELINE
+              value: "100"
+            - name: VISIT_RATE_NEWSFEED
+              value: "1000"
+            - name: VISIT_RATE_FOLLOW
+              value: "10"
+            - name: NEXT_REQUEST_MIN_WAIT_MS
+              value: "1000"
+            - name: NEXT_REQUEST_MAX_WAIT_MS
+              value: "10000"
+#            - name: ENABLE_TIME_SLOT_PROBABILITY
+#              value: "1"
+            - name: LOCUSTFILE
+              value: "locustfile.py"
