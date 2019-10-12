@@ -5,11 +5,13 @@
 replicaCount: 1
 
 image:
-  repository: maxwang
+  repository: vmturbo
   tag: 0.6
   locustTag: dev
   pullPolicy: IfNotPresent
   locustPullPolicy: Always
+istioingress:
+  enabled: true
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious

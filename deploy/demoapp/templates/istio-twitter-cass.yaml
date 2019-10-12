@@ -1,3 +1,4 @@
+{{- if .Values.istioingress.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -45,3 +46,4 @@ spec:
         host: twitter-cass-api
         port:
           number: 8699
+{{- end }}
