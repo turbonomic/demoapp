@@ -23,26 +23,24 @@ spec:
             - name: LOCUST_MASTER
               value: locust-master
             - name: TARGET_HOST
-              # Replace the IP with the twitter app IP
-              # e.g., value: "http://35.237.107.176:8699"
-              value: "http://<IP>:8699"
+              value: {{ .Values.locust.target_host | quote}}
             - name: MAX_TWITTER_USER_ID
-              value: "101"
+              value: {{ .Values.locust.max_twitter_user_id | quote}}
             - name: MAX_NUM_FOLLOWS
-              value: "50"
+              value: {{ .Values.locust.max_num_follows | quote}}
             - name: VISIT_RATE_TWEET
-              value: "1000"
+              value: {{ .Values.locust.visit_rate_tweet | quote}}
             - name: VISIT_RATE_TIMELINE
-              value: "100"
+              value: {{ .Values.locust.visit_rate_timeline | quote}}
             - name: VISIT_RATE_NEWSFEED
-              value: "1000"
+              value: {{ .Values.locust.visit_rate_newsfeed | quote}}
             - name: VISIT_RATE_FOLLOW
-              value: "10"
+              value: {{ .Values.locust.visit_rate_follow | quote}}
             - name: NEXT_REQUEST_MIN_WAIT_MS
-              value: "1000"
+              value: {{ .Values.locust.next_request_min_wait_ms | quote}}
             - name: NEXT_REQUEST_MAX_WAIT_MS
-              value: "10000"
-#            - name: ENABLE_TIME_SLOT_PROBABILITY
-#              value: "1"
+              value: {{ .Values.locust.next_request_max_wait_ms | quote}}
+            - name: ENABLE_TIME_SLOT_PROBABILITY
+              value: {{ .Values.locust.enable_time_slot_probality | quote}}
             - name: LOCUSTFILE
-              value: "locustfile.py"
+              value: {{ .Values.locust.locustfile }}

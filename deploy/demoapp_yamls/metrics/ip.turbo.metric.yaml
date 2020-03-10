@@ -1,97 +1,123 @@
 # Configuration for metric instances
-apiVersion: "config.istio.io/v1alpha2"
-kind: metric
+apiVersion: config.istio.io/v1alpha2
+kind: instance
 metadata:
   name: turbopodlatency
-  namespace: default
+  namespace: istio-system
 spec:
-  value: response.duration | "0ms"
-  dimensions:
-    destination_uid: destination.uid | "unknown"
-    destination_ip: destination.ip | ip("0.0.0.0")
-    response_code: response.code | 200
-  monitored_resource_type: '"UNSPECIFIED"'
+  compiledTemplate: metric
+  params:
+    value: response.duration | "0ms"
+    dimensions:
+      destination_ip: destination.ip | ip("0.0.0.0")
+      destination_svc_name: destination.service.name | "unknown"
+      destination_svc_ns: destination.service.namespace | "unknown"
+      destination_uid: destination.uid | "unknown"
+      response_code: response.code | 200
+    monitored_resource_type: '"UNSPECIFIED"'
 ---
-apiVersion: "config.istio.io/v1alpha2"
-kind: metric
+apiVersion: config.istio.io/v1alpha2
+kind: instance
 metadata:
   name: turbosvclatency
-  namespace: default
+  namespace: istio-system
 spec:
-  value: response.duration | "0ms"
-  dimensions:
-    destination_uid: destination.service | "unknown"
-    response_code: response.code | 200
-  monitored_resource_type: '"UNSPECIFIED"'
+  compiledTemplate: metric
+  params:
+    value: response.duration | "0ms"
+    dimensions:
+      destination_uid: destination.service.uid | "unknown"
+      destination_svc_name: destination.service.name | "unknown"
+      destination_svc_ns: destination.service.namespace | "unknown"
+      response_code: response.code | 200
+    monitored_resource_type: '"UNSPECIFIED"'
 ---
-apiVersion: "config.istio.io/v1alpha2"
-kind: metric
+apiVersion: config.istio.io/v1alpha2
+kind: instance
 metadata:
   name: turbopodrequestcount
-  namespace: default
+  namespace: istio-system
 spec:
-  value: "1"
-  dimensions:
-    destination_uid: destination.uid | "unknown"
-    response_code: response.code | 200
-    destination_ip: destination.ip | ip("0.0.0.0")
-  monitored_resource_type: '"UNSPECIFIED"'
+  compiledTemplate: metric
+  params:
+    value: "1"
+    dimensions:
+      destination_ip: destination.ip | ip("0.0.0.0")
+      destination_svc_name: destination.service.name | "unknown"
+      destination_svc_ns: destination.service.namespace | "unknown"
+      destination_uid: destination.uid | "unknown"
+      response_code: response.code | 200
+    monitored_resource_type: '"UNSPECIFIED"'
 ---
-apiVersion: "config.istio.io/v1alpha2"
-kind: metric
+apiVersion: config.istio.io/v1alpha2
+kind: instance
 metadata:
   name: turbosvcrequestcount
-  namespace: default
+  namespace: istio-system
 spec:
-  value: "1"
-  dimensions:
-    destination_uid: destination.service | "unknown"
-    response_code: response.code | 200
-  monitored_resource_type: '"UNSPECIFIED"'
+  compiledTemplate: metric
+  params:
+    value: "1"
+    dimensions:
+      destination_uid: destination.service.uid | "unknown"
+      destination_svc_name: destination.service.name | "unknown"
+      destination_svc_ns: destination.service.namespace | "unknown"
+      response_code: response.code | 200
+    monitored_resource_type: '"UNSPECIFIED"'
 ---
 # Configuration for a Prometheus handler
-apiVersion: "config.istio.io/v1alpha2"
-kind: prometheus
+apiVersion: config.istio.io/v1alpha2
+kind: handler
 metadata:
   name: turbohandler
-  namespace: default
+  namespace: istio-system
 spec:
-  metrics:
-  - name: turbo_service_latency_time_ms # Prometheus metric name
-    instance_name: turbosvclatency.metric.default # Mixer instance name (fully-qualified)
-    kind: DISTRIBUTION
-    label_names:
-    - destination_uid
-    - response_code
-    buckets:
-      explicit_buckets:
-        bounds: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
-  - name: turbo_pod_latency_time_ms # Prometheus metric name
-    instance_name: turbopodlatency.metric.default # Mixer instance name (fully-qualified)
-    kind: DISTRIBUTION
-    label_names:
-    - destination_uid
-    - destination_ip
-    - response_code
-    buckets:
-      explicit_buckets:
-        bounds: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
-  - name: turbo_service_request_count
-    instance_name: turbosvcrequestcount.metric.default
-    kind: COUNTER
-    label_names:
-    - destination_uid
-    - response_code
-  - name: turbo_pod_request_count
-    instance_name: turbopodrequestcount.metric.default
-    kind: COUNTER
-    label_names:
-    - destination_uid
-    - destination_ip
-    - response_code
+  compiledAdapter: prometheus
+  params:
+    metrics:
+    - name: turbo_service_latency_time_ms # Prometheus metric name
+      instance_name: turbosvclatency.instance.istio-system # Mixer instance name (fully-qualified)
+      kind: DISTRIBUTION
+      label_names:
+      - destination_uid
+      - destination_svc_name
+      - destination_svc_ns
+      - response_code
+      buckets:
+        explicit_buckets:
+          bounds: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+    - name: turbo_pod_latency_time_ms # Prometheus metric name
+      instance_name: turbopodlatency.instance.istio-system # Mixer instance name (fully-qualified)
+      kind: DISTRIBUTION
+      label_names:
+      - destination_ip
+      - destination_svc_name
+      - destination_svc_ns
+      - destination_uid
+      - response_code
+      buckets:
+        explicit_buckets:
+          bounds: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+    - name: turbo_service_request_count
+      instance_name: turbosvcrequestcount.instance.istio-system
+      kind: COUNTER
+      label_names:
+      - destination_uid
+      - destination_svc_name
+      - destination_svc_ns
+      - response_code
+    - name: turbo_pod_request_count
+      instance_name: turbopodrequestcount.instance.istio-system
+      kind: COUNTER
+      label_names:
+      - destination_ip
+      - destination_svc_name
+      - destination_svc_ns
+      - destination_uid
+      - response_code
 ---
 # Rule to send metric instances to a Prometheus handler
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: config.istio.io/v1alpha2
 kind: rule
 metadata:
   name: turbo-grpc
@@ -99,15 +125,15 @@ metadata:
 spec:
   match: context.protocol == "grpc"
   actions:
-  - handler: turbohandler.prometheus.default
+  - handler: turbohandler.handler.istio-system
     instances:
-    - turbosvclatency.metric.default
-    - turbosvcrequestcount.metric.default
-    - turbopodlatency.metric.default
-    - turbopodrequestcount.metric.default
+    - turbosvclatency.instance.istio-system
+    - turbosvcrequestcount.instance.istio-system
+    - turbopodlatency.instance.istio-system
+    - turbopodrequestcount.instance.istio-system
 ---
 # Rule to send metric instances to a Prometheus handler
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: config.istio.io/v1alpha2
 kind: rule
 metadata:
   name: turbo-http
@@ -115,10 +141,10 @@ metadata:
 spec:
   match: context.protocol == "http"
   actions:
-  - handler: turbohandler.prometheus.default
+  - handler: turbohandler.handler.istio-system
     instances:
-    - turbosvclatency.metric.default
-    - turbosvcrequestcount.metric.default
-    - turbopodlatency.metric.default
-    - turbopodrequestcount.metric.default
+    - turbosvclatency.instance.istio-system
+    - turbosvcrequestcount.instance.istio-system
+    - turbopodlatency.instance.istio-system
+    - turbopodrequestcount.instance.istio-system
 ---

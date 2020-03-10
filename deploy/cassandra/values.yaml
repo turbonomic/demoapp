@@ -8,6 +8,9 @@ image:
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
   # pullSecrets: myregistrykey
 
+#nameOverride: ""
+fullnameOverride: cassandra
+
 ## Specify a service type
 ## ref: http://kubernetes.io/docs/user-guide/services/
 service:

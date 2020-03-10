@@ -5,7 +5,7 @@ import argparse
 DEFUALT_IMAGE_TAG = 'latest'
 
 dockerfile_temp = Template("""
-                    FROM maxwang/python-flask-grpc:latest
+                    FROM vmturbo/python-flask-grpc:latest
                     COPY cass_driver/ /cass_driver/
                     COPY $svc_name/ /$svc_name/
                     COPY entrypoint.sh.tmp /entrypoint.sh
@@ -24,25 +24,25 @@ while true; do sleep 3600; done
 def get_build_list(image_tag):
     return [
         {
-            'img': 'maxwang/twitter-cass-api:' + image_tag,
+            'img': 'vmturbo/twitter-cass-api:' + image_tag,
             'svc_name': 'http_server',
             'svc_port': '8699',
             'python_main_path': '/http_server/http_server.py',
         },
         {
-            'img': 'maxwang/twitter-cass-user:' + image_tag,
+            'img': 'vmturbo/twitter-cass-user:' + image_tag,
             'svc_name': 'user_service',
             'svc_port': '50051',
             'python_main_path': '/user_service/user_service_grpc.py',
         },
         {
-            'img': 'maxwang/twitter-cass-tweet:' + image_tag,
+            'img': 'vmturbo/twitter-cass-tweet:' + image_tag,
             'svc_name': 'tweet_service',
             'svc_port': '50052',
             'python_main_path': '/tweet_service/tweet_service_grpc.py',
         },
         {
-            'img': 'maxwang/twitter-cass-friend:' + image_tag,
+            'img': 'vmturbo/twitter-cass-friend:' + image_tag,
             'svc_name': 'friend_service',
             'svc_port': '50053',
             'python_main_path': '/friend_service/friend_service_grpc.py',

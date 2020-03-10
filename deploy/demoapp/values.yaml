@@ -13,6 +13,19 @@ image:
 istioingress:
   enabled: true
 
+locust:
+  target_host: http://twitter-cass-api:8699
+  max_twitter_user_id: 101
+  max_num_follows: 50
+  visit_rate_tweet: 100
+  visit_rate_timeline: 100
+  visit_rate_newsfeed: 1000
+  visit_rate_follow: 10
+  next_request_min_wait_ms: 1000
+  next_request_max_wait_ms: 10000
+  enable_time_slot_probality: 0
+  locustfile: locustfile.py
+
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

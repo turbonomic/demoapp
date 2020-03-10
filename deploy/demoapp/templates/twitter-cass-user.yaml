@@ -34,8 +34,6 @@ spec:
   type: ClusterIP
   ports:
     - port: 50051
-      targetPort: 50051
-      protocol: TCP
       name: grpc-twitter-cass-user
   selector:
     app: twitter-cass-user
