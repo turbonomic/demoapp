@@ -63,12 +63,12 @@ config:
   # you need to set endpoint_snitch to GossipingPropertyFileSnitch.
   # Otherwise, these values are ignored and datacenter1 and rack1
   # are used.
-  dc_name: DC1
-  rack_name: RAC1
-  endpoint_snitch: SimpleSnitch
+  #dc_name: DC1
+  #rack_name: RAC1
+  endpoint_snitch: GossipingPropertyFileSnitch
   max_heap_size: 2048M
   heap_new_size: 512M
-  start_rpc: false
+  #start_rpc: false
   ports:
     cql: 9042
     thrift: 9160
