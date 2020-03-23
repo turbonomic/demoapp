@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twitter-cass-friend
@@ -6,6 +6,9 @@ metadata:
     app: twitter-cass-friend
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: twitter-cass-friend
   template:
     metadata:
       labels:

@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: locust-worker
@@ -7,6 +7,10 @@ metadata:
     role: worker
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: locust
+      role: worker
   template:
     metadata:
       labels:
