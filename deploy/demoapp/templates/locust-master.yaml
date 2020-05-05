@@ -69,6 +69,10 @@ spec:
               value: {{ .Values.locust.enable_time_slot_probality | quote}}
             - name: LOCUSTFILE
               value: {{ .Values.locust.locustfile }}
+            - name: TIME_SLOT_PROBABILITY
+              value: {{ .Values.locust.time_slot_probability | quote}}
+            - name: TIME_SLOT_PROBABILITY_STEP_IN_MIN
+              value: {{ .Values.locust.time_slot_probability_step_in_min | quote}}
           ports:
             - name: loc-master-web
               containerPort: 8089

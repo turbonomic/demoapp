@@ -23,7 +23,9 @@ locust:
   visit_rate_follow: 10
   next_request_min_wait_ms: 1000
   next_request_max_wait_ms: 10000
-  enable_time_slot_probality: 0
+  enable_time_slot_probality: 1
+  time_slot_probability: 1.0,0.1
+  time_slot_probability_step_in_min: 30
   locustfile: locustfile.py
 
 resources:
@@ -37,3 +39,7 @@ resources:
    requests:
      cpu: 250m
      memory: 64Mi
+
+cassandra:
+  exporter:
+    enabled: true
