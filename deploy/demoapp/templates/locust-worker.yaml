@@ -45,6 +45,10 @@ spec:
             - name: NEXT_REQUEST_MAX_WAIT_MS
               value: {{ .Values.locust.next_request_max_wait_ms | quote}}
             - name: ENABLE_TIME_SLOT_PROBABILITY
-              value: {{ .Values.locust.enable_time_slot_probality | quote}}
+              value: {{ .Values.locust.enable_time_slot_probability | quote}}
             - name: LOCUSTFILE
               value: {{ .Values.locust.locustfile }}
+            - name: TIME_SLOT_PROBABILITY
+              value: {{ .Values.locust.time_slot_probability | quote}}
+            - name: TIME_SLOT_PROBABILITY_STEP_IN_MIN
+              value: {{ .Values.locust.time_slot_probability_step_in_min | quote}}

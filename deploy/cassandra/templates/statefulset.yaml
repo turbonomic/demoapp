@@ -111,6 +111,12 @@ spec:
           value: {{ default "RAC1" .Values.config.rack_name | quote }}
         - name: CASSANDRA_START_RPC
           value: {{ default "false" .Values.config.start_rpc | quote }}
+        - name: CASSANDRA_LISTEN_ADDRESS
+          value: 127.0.0.1
+        - name: CASSANDRA_BROADCAST_ADDRESS
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: POD_IP
           valueFrom:
             fieldRef:
