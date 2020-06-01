@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ template "cassandra.fullname" . }}
-  name: hello-prometheus-scraping
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "cassandra.name" . }}
     chart: {{ template "cassandra.chart" . }}
