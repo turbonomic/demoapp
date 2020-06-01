@@ -3,6 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: twitter-cass-gateway
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     istio: ingressgateway
@@ -18,6 +19,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: twitter-cass
+  namespace: {{ .Release.Namespace }}
 spec:
   hosts:
   - "*"

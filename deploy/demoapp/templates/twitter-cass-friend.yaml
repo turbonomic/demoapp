@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twitter-cass-friend
+  namespace: {{ .Release.Namespace }}
   labels:
     app: twitter-cass-friend
 spec:
@@ -31,6 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: twitter-cass-friend
+  namespace: {{ .Release.Namespace }}
   labels:
     app: twitter-cass-friend
 spec:
