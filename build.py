@@ -5,8 +5,9 @@ import argparse
 DEFUALT_IMAGE_TAG = 'latest'
 
 dockerfile_temp = Template("""
-                    FROM vmturbo/python-flask-grpc:latest
+                    FROM turbonomic/python-flask-grpc:latest
                     COPY cass_driver/ /cass_driver/
+                    COPY common_service/ /common_service/
                     COPY $svc_name/ /$svc_name/
                     COPY entrypoint.sh.tmp /entrypoint.sh
                     RUN chmod 755 /entrypoint.sh
@@ -16,7 +17,7 @@ dockerfile_temp = Template("""
 
 entrypoint_temp = Template("""#!/bin/bash
 sleep 3
-python $python_main_path &
+python $python_main_path $@ &
 while true; do sleep 3600; done
                     """)
 
@@ -24,25 +25,25 @@ while true; do sleep 3600; done
 def get_build_list(image_tag):
     return [
         {
-            'img': 'vmturbo/twitter-cass-api:' + image_tag,
+            'img': 'turbonomic/twitter-cass-api:' + image_tag,
             'svc_name': 'http_server',
             'svc_port': '8699',
             'python_main_path': '/http_server/http_server.py',
         },
         {
-            'img': 'vmturbo/twitter-cass-user:' + image_tag,
+            'img': 'turbonomic/twitter-cass-user:' + image_tag,
             'svc_name': 'user_service',
             'svc_port': '50051',
             'python_main_path': '/user_service/user_service_grpc.py',
         },
         {
-            'img': 'vmturbo/twitter-cass-tweet:' + image_tag,
+            'img': 'turbonomic/twitter-cass-tweet:' + image_tag,
             'svc_name': 'tweet_service',
             'svc_port': '50052',
             'python_main_path': '/tweet_service/tweet_service_grpc.py',
         },
         {
-            'img': 'vmturbo/twitter-cass-friend:' + image_tag,
+            'img': 'turbonomic/twitter-cass-friend:' + image_tag,
             'svc_name': 'friend_service',
             'svc_port': '50053',
             'python_main_path': '/friend_service/friend_service_grpc.py',
@@ -52,7 +53,7 @@ def get_build_list(image_tag):
 
 def docker_build(svc_name, svc_port, python_main_path, img):
     dockerfile = dockerfile_temp.substitute(svc_name=svc_name, svc_port=svc_port)
-    entrypoint = entrypoint_temp.substitute(python_main_path=python_main_path)
+    entrypoint = entrypoint_temp.safe_substitute(python_main_path=python_main_path)
 
     # Write to temp files: Dockerfile.tmp and entrypoint.tmp
     with open("Dockerfile.tmp", "w") as text_file:

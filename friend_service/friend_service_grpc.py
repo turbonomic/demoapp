@@ -1,12 +1,17 @@
-from concurrent import futures
+import instana
 import time
 import logging
+from os import path
+import sys
 import friend_service_pb2
 import friend_service_pb2_grpc
-import grpc
-from friend_service import friend_svc
+from friend_service import FriendService
+sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common_service'))
+from common_service import create_grpc_server  # noqa: E402
 
 GRPC_PORT = 50053
+
+friend_svc = FriendService()
 
 
 class FriendServicer(friend_service_pb2_grpc.FriendServicer):
@@ -24,12 +29,11 @@ class FriendServicer(friend_service_pb2_grpc.FriendServicer):
         return friend_service_pb2.FollowsResponse(done=done)
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    friend_service_pb2_grpc.add_FriendServicer_to_server(
-        FriendServicer(), server)
-    server.add_insecure_port('[::]:' + str(GRPC_PORT))
+if __name__ == '__main__':
+    server = create_grpc_server(GRPC_PORT)
+    friend_service_pb2_grpc.add_FriendServicer_to_server(FriendServicer(), server)
     server.start()
+
     logging.info("GRPC server for friend service started")
 
     try:
@@ -37,13 +41,3 @@ def serve():
             time.sleep(3600)
     except KeyboardInterrupt:
         server.stop(0)
-
-
-if __name__ == '__main__':
-    logger = logging.getLogger()
-    logger.setLevel('INFO')
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
-    logger.addHandler(handler)
-
-    serve()

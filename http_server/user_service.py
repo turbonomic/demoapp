@@ -2,7 +2,7 @@ from __future__ import print_function
 import user_service_pb2
 import user_service_pb2_grpc
 import grpc
-
+from retrying import retry
 import logging
 import os
 
@@ -22,6 +22,7 @@ class UserService:
     def __del__(self):
         self.channel.close()
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def name(self, user_id):
         if user_id in username_cache:
             return username_cache[user_id]
@@ -30,6 +31,7 @@ class UserService:
         username_cache[user_id] = user.name
         return user.name
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def names(self, user_ids):
         if len(user_ids) == 0:
             return []
@@ -42,14 +44,17 @@ class UserService:
         users = self.stub.GetUsers(request)
         return users.names
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def check_session(self, user_id, session_key):
         res = self.stub.CheckSession(user_service_pb2.CheckSessionRequest(user_id=user_id, session_key=session_key))
         return res.ok
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def remove_session(self, session_key):
         res = self.stub.RemoveSession(user_service_pb2.RemoveSessionRequest(session_key=session_key))
         return res.ok
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def check_password(self, user_id, password):
         res = self.stub.CheckPassword(user_service_pb2.CheckPasswordRequest(user_id=user_id, password=password))
         return res.ok, res.session_key
