@@ -2,7 +2,7 @@ from __future__ import print_function
 import friend_service_pb2
 import friend_service_pb2_grpc
 import grpc
-
+from retrying import retry
 import logging
 import os
 
@@ -20,6 +20,7 @@ class FriendService:
     def __del__(self):
         self.channel.close()
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def followees(self, user_id):
         res = self.stub.Followees(friend_service_pb2.FolloweesRequest(user_id=user_id))
         return list(res.followees)
@@ -27,6 +28,7 @@ class FriendService:
     def followers(self, user_id):
         pass
 
+    @retry(wait_fixed=100, stop_max_attempt_number=5)
     def follows(self, from_id, to_id):
         res = self.stub.Follows(friend_service_pb2.FollowsRequest(user_id=from_id, followee=to_id))
         return res.done

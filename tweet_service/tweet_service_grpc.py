@@ -1,12 +1,18 @@
-from concurrent import futures
+import instana
+import threading
 import time
 import logging
 import tweet_service_pb2
 import tweet_service_pb2_grpc
-import grpc
-from tweet_service import tweet_svc
+import sys
+from os import path
+from tweet_service import TweetService
+sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common_service'))
+from common_service import options, create_grpc_server  # noqa: E402
 
 GRPC_PORT = 50052
+
+tweet_svc = TweetService(threading.Lock())
 
 
 class TweetServicer(tweet_service_pb2_grpc.TweetServicer):
@@ -34,12 +40,11 @@ class TweetServicer(tweet_service_pb2_grpc.TweetServicer):
             )
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    tweet_service_pb2_grpc.add_TweetServicer_to_server(
-        TweetServicer(), server)
-    server.add_insecure_port('[::]:' + str(GRPC_PORT))
+if __name__ == '__main__':
+    server = create_grpc_server(GRPC_PORT)
+    tweet_service_pb2_grpc.add_TweetServicer_to_server(TweetServicer(), server)
     server.start()
+
     logging.info("GRPC server for tweet service started")
 
     try:
@@ -47,13 +52,3 @@ def serve():
             time.sleep(3600)
     except KeyboardInterrupt:
         server.stop(0)
-
-
-if __name__ == '__main__':
-    logger = logging.getLogger()
-    logger.setLevel('INFO')
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
-    logger.addHandler(handler)
-
-    serve()

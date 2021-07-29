@@ -4,7 +4,7 @@ import logging
 from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.policies import DCAwareRoundRobinPolicy
 import cass_queries as cstr
-import conf
+import cass_conf
 import threading
 
 CASSANDRA_HOSTS = [os.getenv('CASSANDRA_HOST_ADDRESS', 'localhost')]
@@ -14,12 +14,12 @@ DC = 'DC1'
 
 
 table_create_query_dict = {
-    conf.TWITTER_TWEET_TABLE_NAME: cstr.q_create_tweet_table_temp.substitute(
-        table_name=conf.TWITTER_TWEET_TABLE_NAME),
-    conf.TWITTER_FRIEND_TABLE_NAME: cstr.q_create_tweet_friend_table_temp.substitute(
-        table_name=conf.TWITTER_FRIEND_TABLE_NAME),
-    conf.TWITTER_SESSION_TABLE_NAME: cstr.q_create_session_table_temp.substitute(
-        table_name=conf.TWITTER_SESSION_TABLE_NAME),
+    cass_conf.TWITTER_TWEET_TABLE_NAME: cstr.q_create_tweet_table_temp.substitute(
+        table_name=cass_conf.TWITTER_TWEET_TABLE_NAME),
+    cass_conf.TWITTER_FRIEND_TABLE_NAME: cstr.q_create_tweet_friend_table_temp.substitute(
+        table_name=cass_conf.TWITTER_FRIEND_TABLE_NAME),
+    cass_conf.TWITTER_SESSION_TABLE_NAME: cstr.q_create_session_table_temp.substitute(
+        table_name=cass_conf.TWITTER_SESSION_TABLE_NAME),
 }
 
 

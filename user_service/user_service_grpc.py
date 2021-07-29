@@ -1,12 +1,17 @@
-from concurrent import futures
-import time
+import instana
 import logging
+from os import path
+import sys
+import time
 import user_service_pb2
 import user_service_pb2_grpc
-import grpc
-from user_service import user_svc
+from user_service import UserService
+sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common_service'))
+from common_service import create_grpc_server  # noqa: E402
 
 GRPC_PORT = 50051
+
+user_svc = UserService()
 
 
 class UserServicer(user_service_pb2_grpc.TwitterUserServicer):
@@ -40,12 +45,11 @@ class UserServicer(user_service_pb2_grpc.TwitterUserServicer):
         return user_service_pb2.RemoveSessionResponse(ok=ok)
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    user_service_pb2_grpc.add_TwitterUserServicer_to_server(
-        UserServicer(), server)
-    server.add_insecure_port('[::]:' + str(GRPC_PORT))
+if __name__ == '__main__':
+    server = create_grpc_server(GRPC_PORT)
+    user_service_pb2_grpc.add_TwitterUserServicer_to_server(UserServicer(), server)
     server.start()
+
     logging.info("GRPC server for user service started")
 
     try:
@@ -53,13 +57,3 @@ def serve():
             time.sleep(3600)
     except KeyboardInterrupt:
         server.stop(0)
-
-
-if __name__ == '__main__':
-    logger = logging.getLogger()
-    logger.setLevel('INFO')
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(module)s] [%(levelname)s] %(name)s: %(message)s"))
-    logger.addHandler(handler)
-
-    serve()
