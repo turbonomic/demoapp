@@ -1,11 +1,13 @@
-import time
-import os
 import logging
-from cassandra.cluster import Cluster, NoHostAvailable
-from cassandra.policies import DCAwareRoundRobinPolicy
-import cass_queries as cstr
-import cass_conf
+import os
 import threading
+import time
+
+from cassandra.cluster import Cluster
+from cassandra.policies import DCAwareRoundRobinPolicy
+
+import cass_conf
+import cass_queries as cstr
 
 CASSANDRA_HOSTS = [os.getenv('CASSANDRA_HOST_ADDRESS', 'localhost')]
 CASSANDRA_PORT = os.getenv('CASSANDRA_PORT', 9042)
@@ -42,12 +44,13 @@ class CassandraDriver:
 
         try:
             self._create_session()
-        except NoHostAvailable as e:
+        except Exception as e:
             raise DBDriverConnectionException(e)
         self._create_table()
 
     def __del__(self):
-        self.cluster.shutdown()
+        if self.cluster is not None:
+            self.cluster.shutdown()
 
     def _get_session(self):
         self.session_idx = (self.session_idx + 1) % len(self.session_pool)
