@@ -19,11 +19,29 @@ spec:
       - name: twitter-cass-tweet
         image: {{ .Values.image.repository }}/twitter-cass-tweet:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.grpc.max_connection_age_ms }}
+        args:
+        - --grpc-max-connection-age-ms {{ .Values.grpc.max_connection_age_ms }}
+{{- end }}
         ports:
           - containerPort: 50052
         env:
         - name: CASSANDRA_HOST_ADDRESS
           value: cassandra
+{{- if .Values.grpc.debug }}
+        - name: GRPC_VERBOSITY
+          value: DEBUG
+{{- if .Values.grpc.trace }}
+        - name: GRPC_TRACE
+          value: {{ .Values.grpc.trace | quote }}
+{{- end }}
+{{- end }}
+{{- if .Values.instana.enabled }}
+        - name: INSTANA_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+{{- end }}
         resources:
 {{ toYaml .Values.resources | indent 12 }}
       restartPolicy: Always
