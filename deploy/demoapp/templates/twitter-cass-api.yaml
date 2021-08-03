@@ -21,6 +21,23 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: 8699
+{{- if or .Values.grpc.debug .Values.instana.enabled }}
+        env:
+{{- if .Values.grpc.debug }}
+        - name: GRPC_VERBOSITY
+          value: DEBUG
+{{- if .Values.grpc.trace }}
+        - name: GRPC_TRACE
+          value: {{ .Values.grpc.trace | quote }}
+{{- end }}
+{{- end }}
+{{- if .Values.instana.enabled }}
+        - name: INSTANA_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+{{- end }}
+{{- end }}
         resources:
 {{ toYaml .Values.resources | indent 12 }}
       restartPolicy: Always

@@ -5,28 +5,27 @@
 replicaCount: 1
 
 image:
-  repository: vmturbo
-  tag: 0.6
-  locustTag: dev
+  repository: turbonomic
+  tag: "1.0"
+  locustTag: "1.0"
   pullPolicy: IfNotPresent
-  locustPullPolicy: Always
+  locustPullPolicy: IfNotPresent
+
+# Install istio ingress. Disable this if istio is not deployed in your cluster
 istioingress:
   enabled: true
 
-locust:
-  target_host: http://twitter-cass-api:8699
-  max_twitter_user_id: 101
-  max_num_follows: 50
-  visit_rate_tweet: 100
-  visit_rate_timeline: 100
-  visit_rate_newsfeed: 1000
-  visit_rate_follow: 10
-  next_request_min_wait_ms: 1000
-  next_request_max_wait_ms: 10000
-  enable_time_slot_probality: 1
-  time_slot_probability: 1.0,0.1
-  time_slot_probability_step_in_min: 30
-  locustfile: locustfile.py
+grpc:
+  # Maximum time in milliseconds that a server gRPC channel may exist.
+  # If undefined (the default), the server gRPC channel live forever.
+  # Only use this if there is no other gRPC load balancing strategy available in your cluster,
+  # such as proxy load balancer (e.g., envoy), or service mesh (e.g., istio or linkerd).
+  # When defined, the server will close the gRPC channel after the specified time, so that the
+  # client can re-establish the connection and use the TCP-based (L4) load balancing that comes
+  # with native kubernetes service.
+  #
+  #max_connection_age_ms: 5000
+  debug: false
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -40,6 +39,41 @@ resources:
      cpu: 250m
      memory: 64Mi
 
+instana:
+  # Specify true to enable instana metric reporting to instana agent
+  enabled: false
+
+# Locust load generator
+locust:
+  serviceType: LoadBalancer
+  target_host: http://twitter-cass-api:8699
+  max_twitter_user_id: 101
+  max_num_follows: 50
+  visit_rate_tweet: 100
+  visit_rate_timeline: 100
+  visit_rate_newsfeed: 1000
+  visit_rate_follow: 10
+  next_request_min_wait_ms: 1000
+  next_request_max_wait_ms: 10000
+  enable_time_slot_probality: 1
+  time_slot_probability: "1.0,0.1"
+  time_slot_probability_step_in_min: 30
+  locustfile: locustfile.py
+
+# Cassandra database
 cassandra:
   exporter:
     enabled: true
+  persistence:
+    ## cassandra data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    size: 10Gi
+  config:
+    cluster_size: 3
+    seed_size: 2
