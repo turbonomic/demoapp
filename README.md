@@ -20,7 +20,7 @@ are used to further monitor and control the system.
 
 **Twitter App** : 
    * The simplified Twitter-like application in scalable microservice architecture.
-   * See [`here`](./deploy/app) for the architecture and deployment;
+   * See [`here`](./deploy/demoapp_yamls/app) for the architecture and deployment;
    
 **Cassandra Cluster and Exporter** :
    * The [`Cassandra cluster`](http://cassandra.apache.org/) is the backend databases for the Twitter app;
@@ -39,7 +39,7 @@ are used to further monitor and control the system.
    * Simulate the users' behavior to visit the app. [`Locust`](https://locust.io/) cluster is used here.
 
 ## Prerequisites
-* Turbonomic 6.2+ 
+* Turbonomic 8.2+ 
 * Kubernetes 1.7.3+
 * Istio 1.0+
 
