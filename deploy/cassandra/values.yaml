@@ -112,7 +112,13 @@ readinessProbe:
 
 ## Additional pod annotations
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-podAnnotations: {}
+podAnnotations:
+  # Enable istio metrics merging for cassandra by uncommenting the following annotations.
+  # Make sure the port matches export.port.
+  # See https://superorbital.io/journal/istio-metrics-merging/
+  #prometheus.io/port: '5556'
+  #prometheus.io/path: /metrics
+  #prometheus.io/scrape: 'true'
 
 ## Additional pod labels
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
