@@ -73,7 +73,7 @@ cassandra:
     ##   GKE, AWS & OpenStack)
     ##
     # storageClass: "-"
-    size: 10Gi
+    size: 30Gi
   config:
     cluster_size: 3
     seed_size: 2
