@@ -38,7 +38,7 @@ The recommended install method is `istioctl`:
 
 ### Install Testbed
 
-Use Helm to install the testbed. The Helm charts packages both Cassandra and TwitterApp to make the installation easier.
+Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp and Locust workload generator to make the installation easier.
 
 * Specify proper settings in `values.yaml`
 
