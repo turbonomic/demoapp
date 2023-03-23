@@ -8,8 +8,8 @@ Follow the [`instructions`]( https://istio.io/latest/docs/setup/getting-started/
 of writing).
 The recommended install method is `istioctl`:
 
-* [Download](https://istio.io/latest/docs/setup/getting-started/#download)
-* [Install](https://istio.io/latest/docs/setup/getting-started/#install)
+* [Download](https://istio.io/latest/docs/setup/getting-started/#download) the **Istio** distribution and upack it.
+* [Install](https://istio.io/latest/docs/setup/getting-started/#install) **Istio**:
     * For vanilla Kubernetes cluster, use the `demo` profile.
     * For vendor-specific cluster, use the corresponding profile
       outlined [here](https://istio.io/latest/docs/setup/platform-setup/).
@@ -80,3 +80,17 @@ Use Helm to install the testbed. The Helm charts packages both Cassandra and Twi
 * Optional: import the [`dashboard`](./demoapp_yamls/metrics/cass-testbed-grafana-dashboard.json) to Grafana;
 
 ### Generate Load
+To generate load on the testbed, you can use the Locust load generator that is already installed as part of the Helm chart.
+Here's how to use it:
+
+* Open a new terminal and run the following command to start the Locust master:
+  ```shell
+  $ kubectl -n demoapp port-forward svc/locust-master 8089:8089
+  ```
+
+* Open a web browser and go to http://localhost:8089. This will open the Locust web interface.
+* Enter the desired number of users and spawn rate (for example, `300` and `20` respectively), and then start the test by clicking the "Start swarming" button.
+* Monitor the load and performance metrics on the Prometheus Dashboard to see how the testbed is performing under load.
+
+Note that the testbed is configured to alternate between periods of high and low traffic every 30 minutes by default. 
+You can adjust this setting by changing the `locust.time_slo_probability` and `locust.time_slo_probability_step_in_min` parameter in the `values.yaml` file.
