@@ -2,6 +2,11 @@
   <img width=300 height=150 src="https://cloud.githubusercontent.com/assets/4391815/26681386/05b857c4-46ab-11e7-8c71-15a46d886834.png">
 </p>
 
+### Prerequisite
+The following prerequisite must be met before the install:
+* Kubernetes 1.22+, or OCP 4.11+.
+* A preconfigured `StorageClass`. This is needed by `Cassandra` to dynamically provision PVs. 
+
 ### Install Istio
 
 Follow the [`instructions`]( https://istio.io/latest/docs/setup/getting-started/) to install `Istio` (**1.17.1** at the time
