@@ -18,14 +18,17 @@ The recommended install method is `istioctl`:
     * For vanilla Kubernetes cluster, use the `demo` profile.
     * For vendor-specific cluster, use the corresponding profile
       outlined [here](https://istio.io/latest/docs/setup/platform-setup/).
-    * Make sure the `Prometheus` add-on is installed.
-    * For example, use the following command to install `Istio` with `Prometheus` enabled in an Openshift cluster:
+    * For example, use the following command to install `Istio` in an Openshift cluster:
       ```shell
-      $ istioctl install --set profile=openshift --set values.prometheus.enabled=true -y
+      $ istioctl install --set profile=openshift -y
+      ```
+    * Install the `Prometheus` add-on.
+      ```shell
+      $ kubectl apply -f samples/addons/prometheus.yaml
       ```
 * Verify all pods are running:
   ```shell
-  $ oc -n istio-system get po
+  $ kubectl -n istio-system get po
   NAME                                    READY   STATUS    RESTARTS   AGE
   istio-ingressgateway-7954975d69-wtdnp   1/1     Running   0          14d
   istiod-584b74f7f9-ll8z8                 1/1     Running   0          14d
@@ -34,6 +37,12 @@ The recommended install method is `istioctl`:
 * Verify prometheus dashboard is up and running:
   ```shell
   $ istioctl dashboard prometheus
+  ```
+* Create a `demoapp` namespace and enable istio auto-injection:
+  ```shell
+  $ kubectl create ns demoapp
+  $ kubectl label namespace demoapp istio-injection=enabled
+  namespace/demoapp labeled
   ```
 
 ### Install Testbed
@@ -66,10 +75,10 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
   Saving 1 charts
   Deleting outdated charts
   ```
-* Install the charts:
+* Deploy the charts in the `demoapp` namespace:
   ```shell
   $ cd deploy
-  $ helm install demoapp ./demoapp
+  $ helm -n demoapp install demoapp ./demoapp
   ```
 
 ### Verify the Install
