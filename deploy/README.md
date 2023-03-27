@@ -67,6 +67,17 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
    `cassandra.config.seed_size` | `2`                        | Number   | Specify the seed size of cassandra cluster
    `istioingress.enabled` | `true`                     | Boolean  | Enable **Istio** ingress. Do not enable if **Istio** is not installed
 
+* If cassandra exporter is enabled, specify the following annotation to allow merging of Cassandra metrics into istio agent:
+  ```yaml
+  cassandra:
+    podAnnotations:
+      # Enable istio metrics merging for cassandra by uncommenting the following annotations.
+      # Make sure the port matches export.port.
+      # See https://superorbital.io/journal/istio-metrics-merging/
+      prometheus.io/port: '5556'
+      prometheus.io/path: /metrics
+      prometheus.io/scrape: 'true'
+  ```
 
 * Update the helm charts:
   ```shell
