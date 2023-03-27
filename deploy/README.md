@@ -94,13 +94,22 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
 
 ### Verify the Install
 
-* Once deployed, users can visit the website at *http://<APP_IP>* where APP_IP is the ingress IP of the **Istio**
-  ingress
-  gateway, which can be found by:
+* Once deployed, users can accessing the application through the `istio-ingressgateway` service:
   ```console
-  kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  $ kubectl -n istio-system get service istio-ingressgateway'
+  NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
+  istio-ingressgateway   LoadBalancer   172.30.93.127   <pending>     15021:30832/TCP,80:32284/TCP,443:31342/TCP   20d
   ```
+  In a Openshift cluster, you can create a `route` for the service:
+  ```console
+  $ kubectl -n istio-system get route
+  NAME                   HOST/PORT                                                             PATH   SERVICES               PORT    TERMINATION  WILDCARD
+  istio-ingressgateway   istio-ingressgateway-istio-system.apps.mengdingocp4.cp.fyre.ibm.com          istio-ingressgateway   http2                 None
+  ```
+
 * Login with username as any positive integer between 1 and 100, and password same as the username.
+  
+  ![image](https://user-images.githubusercontent.com/10012486/228050169-bfdb8faf-3bc7-4d5c-b634-cf8b0373281b.png)
 
 * Optional: import the [`dashboard`](./demoapp_yamls/metrics/cass-testbed-grafana-dashboard.json) to Grafana;
 
@@ -114,8 +123,11 @@ Here's how to use it:
   ```
 
 * Open a web browser and go to http://localhost:8089. This will open the Locust web interface.
+
 * Enter the desired number of users and spawn rate (for example, `300` and `20` respectively), and then start the test by clicking the "Start swarming" button.
 * Monitor the load and performance metrics on the Prometheus Dashboard to see how the testbed is performing under load.
+
+  ![image](https://user-images.githubusercontent.com/10012486/228050389-398ed4a6-508e-4a47-a5ea-696bcfeafa5c.png)
 
 Note that the testbed is configured to alternate between periods of high and low traffic every 30 minutes by default. 
 You can adjust this setting by changing the `locust.time_slo_probability` and `locust.time_slo_probability_step_in_min` parameter in the `values.yaml` file.
