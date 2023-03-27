@@ -96,7 +96,7 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
 
 * Once deployed, users can accessing the application through the `istio-ingressgateway` service:
   ```console
-  $ kubectl -n istio-system get service istio-ingressgateway'
+  $ kubectl -n istio-system get service istio-ingressgateway
   NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
   istio-ingressgateway   LoadBalancer   172.30.93.127   <pending>     15021:30832/TCP,80:32284/TCP,443:31342/TCP   20d
   ```
