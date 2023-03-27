@@ -174,6 +174,20 @@ When you want to change the cluster size of your cassandra, you can use the helm
 helm upgrade --set config.cluster_size=5 cassandra incubator/cassandra
 ```
 
+## Enable istio metrics merging
+If you have Cassandra exporter enabled, and at the same time, you enable istio sidecar injection, you need to configure the following annotation in order for metrics to be merged onto `istio-agent`:
+```
+podAnnotations:
+  # Enable istio metrics merging for cassandra by uncommenting the following annotations.
+  # Make sure the port matches export.port.
+  # See https://superorbital.io/journal/istio-metrics-merging/
+  prometheus.io/port: '5556'
+  prometheus.io/path: /metrics
+  prometheus.io/scrape: 'true'
+```
+  ![image](https://user-images.githubusercontent.com/10012486/228046867-eaffdf9a-6a32-4b06-9957-b920a1004b5d.png)
+
+
 ## Get cassandra status
 You can get your cassandra cluster status by running the command
 
