@@ -62,6 +62,13 @@ locust:
 
 # Cassandra database
 cassandra:
+  podAnnotations:
+    # Enable istio metrics merging for cassandra by uncommenting the following annotations.
+    # Make sure the port matches export.port.
+    # See https://superorbital.io/journal/istio-metrics-merging/
+    #prometheus.io/port: '5556'
+    #prometheus.io/path: /metrics
+    #prometheus.io/scrape: 'true'
   exporter:
     enabled: true
   persistence:
