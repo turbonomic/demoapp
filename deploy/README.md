@@ -67,7 +67,7 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
    `cassandra.config.seed_size` | `2`                        | Number   | Specify the seed size of cassandra cluster
    `istioingress.enabled` | `true`                     | Boolean  | Enable **Istio** ingress. Do not enable if **Istio** is not installed
 
-* If cassandra exporter is enabled, specify the following annotation to allow merging of Cassandra metrics into istio agent:
+* If cassandra exporter is enabled, specify the following annotation to allow [merging of Cassandra metrics into istio agent](https://github.com/turbonomic/demoapp/tree/master/deploy/cassandra#enable-istio-metrics-merging):
   ```yaml
   cassandra:
     podAnnotations:
