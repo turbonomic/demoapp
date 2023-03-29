@@ -60,7 +60,7 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
    `instana.enabled` | `false`                    | Boolean  | Enable **Instana** monitoring. Do not enable if **Istio** service mesh is deployed and Istio sidecar injection is enabled
    `grpc.max_connection_age_ms` |                            | Number   | Specify the time after which server will close the gRPC channel to force client reconnection for load balancing. Do not specify when service mesh is enabled
    `locust.time_slot_probability` | `"1.0,0.1"`                | String   | Specify the alternating traffic patterns between `0.0` (no traffic) and `1.0` (full traffic load)
-   `locust.time_slo_probability_step_in_min` | `30`                       | Number   | Specify the time interval before traffic patterns change
+   `locust.time_slot_probability_step_in_min` | `30`                       | Number   | Specify the time interval before traffic patterns change
    `cassandra.exporter.enabled` | `true`                     | Boolean  | Specify if cassandra exporter should be enabled
    `cassandra.persistence.size` | `30Gi`                     | String   | Specify the storage size for each cassandra node
    `cassandra.config.cluster_size` | `3`                        | Number   | Sepcify the size of cassandra cluster
