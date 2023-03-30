@@ -87,7 +87,9 @@ spec:
         - name: CASSANDRA_START_RPC
           value: {{ default "false" .Values.config.start_rpc | quote }}
         - name: CASSANDRA_LISTEN_ADDRESS
-          value: 127.0.0.1
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: CASSANDRA_BROADCAST_ADDRESS
           valueFrom:
             fieldRef:
