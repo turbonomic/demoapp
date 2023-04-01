@@ -69,6 +69,10 @@ cassandra:
     #prometheus.io/port: '5556'
     #prometheus.io/path: /metrics
     #prometheus.io/scrape: 'true'
+  livenessProbe:
+    timeoutSeconds: 120
+  readinessProbe:
+    timeoutSeconds: 120
   exporter:
     enabled: true
   persistence:
