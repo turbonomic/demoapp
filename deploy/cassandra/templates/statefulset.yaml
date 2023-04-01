@@ -166,12 +166,13 @@ spec:
         livenessProbe:
           tcpSocket:
             port: {{ .Values.exporter.port }}
+          timeoutSeconds: 60
         readinessProbe:
           httpGet:
             path: /metrics
             port: {{ .Values.exporter.port }}
           initialDelaySeconds: 20
-          timeoutSeconds: 45
+          timeoutSeconds: 120
 {{- end }}
       terminationGracePeriodSeconds: {{ default 30 .Values.podSettings.terminationGracePeriodSeconds }}
       {{- if .Values.image.pullSecrets }}
