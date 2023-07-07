@@ -41,6 +41,9 @@ The recommended install method is `istioctl`:
   $ kubectl label namespace demoapp istio-injection=enabled
   namespace/demoapp labeled
   ```
+* In Openshift cluster, make sure the following steps are peformed for the above namespace:
+  * [Remove security context constraints](https://istio.io/latest/docs/setup/platform-setup/openshift/#security-context-constraints-for-application-sidecars)
+  * [Invoke `istio-cni` plugin](https://istio.io/latest/docs/setup/platform-setup/openshift/#additional-requirements-for-the-application-namespace)
 
 ### Install Testbed
 
