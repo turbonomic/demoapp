@@ -100,7 +100,7 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
   NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
   istio-ingressgateway   LoadBalancer   172.30.93.127   <pending>     15021:30832/TCP,80:32284/TCP,443:31342/TCP   20d
   ```
-  In a Openshift cluster, you can create a `route` for the service:
+  In a Openshift cluster, you can create a `route` for the service. To create a route, follow instructions [here](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html):
   ```console
   $ kubectl -n istio-system get route
   NAME                   HOST/PORT                                                             PATH   SERVICES               PORT    TERMINATION  WILDCARD
