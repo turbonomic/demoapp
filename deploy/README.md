@@ -53,7 +53,7 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
 
    **Parameter** | **Default Value**          | **Type** |  **Description**
     ---|----------------------------|----------|--------------
-   `image.repository` | `icr.io/cpopen/turbonomic` | String   | The container image repository
+   `image.repository` | `docker.io/turbonomic` | String   | The container image repository
    `image.tag` | `1.0`                      | String   | The image tag for demoapp containers
    `image.locustTag` | `1.0`                      | String   |  The image tag for Locust load generator containers
    `image.pullPolicy` | `IfNotPresent`             | String   | Specify `IfNotPresent`, or `Always`
