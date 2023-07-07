@@ -18,10 +18,7 @@ The recommended install method is `istioctl`:
     * For vanilla Kubernetes cluster, use the `demo` profile.
     * For vendor-specific cluster, use the corresponding profile
       outlined [here](https://istio.io/latest/docs/setup/platform-setup/).
-    * For example, use the following command to install `Istio` in an Openshift cluster:
-      ```shell
-      $ istioctl install --set profile=openshift -y
-      ```
+      * For example, in an Openshift cluster, follow the instructions [here](https://istio.io/latest/docs/setup/platform-setup/openshift/).
     * Install the `Prometheus` add-on.
       ```shell
       $ kubectl apply -f samples/addons/prometheus.yaml
