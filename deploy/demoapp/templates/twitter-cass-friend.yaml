@@ -15,6 +15,8 @@ spec:
       labels:
         app: twitter-cass-friend
     spec:
+      imagePullSecrets:
+        - name: artifactory-registry-secret
       containers:
       - name: twitter-cass-friend
         image: {{ .Values.image.repository }}/twitter-cass-friend:{{ .Values.image.tag }}

@@ -6,6 +6,7 @@
 The following prerequisite must be met before the install:
 * Kubernetes 1.22+, or OCP 4.11+.
 * A preconfigured `StorageClass`. This is needed by `Cassandra` to dynamically provision PVs. 
+* An image pull secret. This is needed in order to pull the images from Artifactory. You can use the [create_artifactory_secret.sh](./artifactory-registry-secret/create_artifactory_registry_secret.sh) script to generate this secret with your Artifactory credentials.
 
 ### Install Istio
 
@@ -115,7 +116,20 @@ Use Helm to install the testbed. The Helm charts packages Cassandra, TwitterApp 
 
 ### Generate Load
 To generate load on the testbed, you can use the Locust load generator that is already installed as part of the Helm chart.
-Here's how to use it:
+
+#### Automatic
+Locust is configured to auto-start generating load by spawning 300 users at a spawn rate of 20. 
+These values can be altered via the `users` and `spawn_rate` properties  of the _values.xml_ file.
+
+To disable auto-start and specify the number of users and spawn rate via the UI, set the 
+`autostart` property to `false` in the _values.xml_ file.
+ 
+#### Manual
+Locust is configured to auto-start generating a load of 300 users at a spawn rate of 20. To 
+disable auto-start and specify the number of users and spawn rate via the UI, set the 
+`autostart` property to `false` in the _values.xml_ file.
+
+Here's how to use Locust to manually generate load:
 
 * Open a new terminal and run the following command to start the Locust master:
   ```shell
