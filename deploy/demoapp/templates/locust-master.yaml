@@ -42,6 +42,8 @@ spec:
         name: locust
         role: master
     spec:
+      imagePullSecrets:
+        - name: artifactory-registry-secret
       containers:
         - name: locust-master
           image: {{ .Values.image.repository }}/locust:{{ .Values.image.locustTag }}
@@ -63,18 +65,24 @@ spec:
               value: {{ .Values.locust.visit_rate_newsfeed | quote}}
             - name: VISIT_RATE_FOLLOW
               value: {{ .Values.locust.visit_rate_follow | quote}}
-            - name: NEXT_REQUEST_MIN_WAIT_MS
-              value: {{ .Values.locust.next_request_min_wait_ms | quote}}
-            - name: NEXT_REQUEST_MAX_WAIT_MS
-              value: {{ .Values.locust.next_request_max_wait_ms | quote}}
+            - name: NEXT_REQUEST_MIN_WAIT_SECS
+              value: {{ .Values.locust.next_request_min_wait_secs | quote}}
+            - name: NEXT_REQUEST_MAX_WAIT_SECS
+              value: {{ .Values.locust.next_request_max_wait_secs | quote}}
             - name: ENABLE_TIME_SLOT_PROBABILITY
-              value: {{ .Values.locust.enable_time_slot_probality | quote}}
+              value: {{ .Values.locust.enable_time_slot_probability | quote}}
             - name: LOCUSTFILE
               value: {{ .Values.locust.locustfile }}
             - name: TIME_SLOT_PROBABILITY
               value: {{ .Values.locust.time_slot_probability | quote}}
             - name: TIME_SLOT_PROBABILITY_STEP_IN_MIN
               value: {{ .Values.locust.time_slot_probability_step_in_min | quote}}
+            - name: AUTOSTART
+              value: {{ .Values.locust.autostart | quote }}
+            - name: USERS
+              value: {{ .Values.locust.users | quote }}
+            - name: SPAWN_RATE
+              value: {{ .Values.locust.spawn_rate | quote }}
           ports:
             - name: loc-master-web
               containerPort: 8089
